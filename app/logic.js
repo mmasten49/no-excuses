@@ -238,6 +238,50 @@
     return mine.sort(function (a, b) { return a - b; });
   }
 
+  // ---------- Resist button ----------
+  var RESIST_MS = 10 * 60 * 1000;
+  // What one buy of this habit usually costs (average of logged buys; $20 until there's history).
+  function typicalBuy(state, cat) {
+    var mine = (state.purchases || []).filter(function (p) { return p.cat === cat; });
+    return mine.length ? round2(sum(mine) / mine.length) : 20;
+  }
+  // Any pending resist whose 10 minutes are up becomes a win. Returns the ones that just resolved.
+  function resolveResists(state, now) {
+    var done = [];
+    (state.resists || []).forEach(function (r) {
+      if (r.status === 'pending' && now >= r.until) { r.status = 'won'; done.push(r); }
+    });
+    return done;
+  }
+  function resistStats(state, from, to) {
+    var won = (state.resists || []).filter(function (r) { return r.status === 'won' && r.ts >= from && r.ts < to; });
+    return { count: won.length, value: round2(won.reduce(function (a, r) { return a + r.amount; }, 0)) };
+  }
+
+  // ---------- Cost in hours ----------
+  function workTime(amount, wage) {
+    if (!(wage > 0) || !(amount > 0)) return null;
+    var mins = Math.round(amount / wage * 60);
+    if (mins < 60) return mins + ' min';
+    var h = Math.round(mins / 6) / 10;
+    return h + (h === 1 ? ' hour' : ' hours');
+  }
+
+  // ---------- Yearly pace ----------
+  // Average of the last (up to) 4 finished counted weeks × 52. Also your old pace (starting number ÷ 4 × 52).
+  function yearlyPace(state, now, cat) {
+    var cur = weekIndex(state.startTs, now);
+    if (cur < 1) return null;
+    var map = weekMap(state, cur), starts = startingNumbers(state, map), weeks = [];
+    for (var k = cur - 1; k >= 0 && weeks.length < 4; k--) if (!map[k].skipped) weeks.push(k);
+    if (!weeks.length) return null;
+    var total = 0;
+    (state.purchases || []).forEach(function (p) {
+      if (p.cat === cat && weeks.indexOf(weekIndex(state.startTs, p.ts)) !== -1) total += p.amount;
+    });
+    return { now: Math.round(total / weeks.length * 52), old: starts.final ? Math.round(starts[cat] / 4 * 52) : null, weeks: weeks.length };
+  }
+
   // Older saves used fixed 'pizza' / 'cash' categories. Move them into the generic slots a / b.
   function migrate(obj) {
     if (!obj || typeof obj !== 'object') return obj;
@@ -258,6 +302,8 @@
   root.NoExcuses = {
     CATS: CATS, weekStart: weekStart, weekIndex: weekIndex, blockPct: blockPct,
     weekMap: weekMap, compute: compute, tripsLeft: tripsLeft, mondayOptions: mondayOptions,
-    weekSummary: weekSummary, stats: stats, blocks: blocks, quickAmounts: quickAmounts, validBackup: validBackup, migrate: migrate
+    weekSummary: weekSummary, stats: stats, blocks: blocks, quickAmounts: quickAmounts, validBackup: validBackup, migrate: migrate,
+    RESIST_MS: RESIST_MS, typicalBuy: typicalBuy, resolveResists: resolveResists, resistStats: resistStats,
+    workTime: workTime, yearlyPace: yearlyPace
   };
 })(typeof window !== 'undefined' ? window : globalThis);

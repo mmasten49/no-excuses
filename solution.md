@@ -37,25 +37,43 @@
 - **Two stat tiles (block 2 and later):**
   - **🔥 Streak:** finished weeks in a row with both categories under the limit, plus your best streak.
   - **💰 Money kept:** how much less you've spent than your old pace (starting number ÷ 4 per week), added up over finished weeks. It's red if negative.
+- **✋ Resisted this week:** a tile showing how many times you held off this week and the dollars you didn't spend.
 - **Two big buttons: + Pizza and + Cash.** Tapping one slides up the Log Purchase sheet.
+- **"✋ I want one. Help me wait." (the resist button):**
+  - Tap it and pick the habit. Each option shows its usual cost, and the work time if your pay is set.
+  - A **10-minute countdown** banner appears at the top of Home, with an **I caved** button.
+  - **If the 10 minutes run out:** it's a win. A "You held off · +$21 not spent" confirmation shows, and it's added to the Resisted tile. The win is worth that habit's average buy ($20 until there's history).
+  - **If you tap I caved, or log a buy of that habit during the countdown:** it's marked lost, and I caved opens the log sheet with the usual amount filled in.
+  - The countdown keeps going if the app is closed. A win is counted the next time the app opens.
+- **"📲 New week" banner (Monday and Tuesday only):** "Send last week's numbers to the person who keeps you honest." **Send** opens the phone's share sheet (Messages, etc.) with the text report. **✕** dismisses it for that week. It appears once per finished week, and not for skipped weeks.
 - **Skip line:** "Break week? Skip this week · 1 skip left this block." It's only shown if nothing has been logged yet this week **and** this block's one skip hasn't been used. Below it, in small text: "1 skip left this block" or "Skip used this block."
   - Tap it and a prompt appears: "Skip this week? Nothing gets tracked until Monday 8 AM, and this week won't count toward your block." The options are **Skip** and **Cancel**.
   - After Skip, the cards are replaced with "Skipped week, back Monday 8 AM," the + Pizza and + Cash buttons are hidden, and an **Undo skip** link appears. Undo is available until the week ends.
 
 ### 3. Log Purchase (a sheet that slides up from the bottom)
 - **Shows:** a Pizza / Cash switch, a big dollar amount, **3 quick-amount buttons** (your 3 most-used amounts for that category; until you have history, $15/$20/$25 for pizza and $20/$40/$60 for cash), and a number keypad. The date and time are filled in automatically.
-- **Before saving**, a line under the amount says what happens: "After this: 0 pizza trips left this week" or "This puts you over by $6."
+- **Before saving**, a line under the amount says what happens: "After this: 0 pizza buys left this week" or "This puts you over by $6." If your pay is set, a second line says **"= 1.3 hours of work."**
 - **Tap Save $19:** saves, closes the sheet, and shows a checkmark confirmation ("Logged $19 · 1 pizza trip left this week"). The phone vibrates on phones that support it.
 - **Tap Cancel or the dark area behind the sheet:** closes it and saves nothing.
 
 ### 4. History
 - **Week navigator:** **‹ Back** and **Next ›** buttons on either side of the week title ("This week," "Last week," "Week of Nov 16"), with dates and block below. Swiping left or right also works. You can't go before week 1 or past this week. When you're viewing a past week, a **"Jump to this week"** button appears.
 - **Week summary:** for each category, dollars spent against the limit with a progress bar, and **Under ✓**, **On track**, or **Over by $X**. Skipped weeks say so.
+- **📲 Send this week (the accountability text):** opens the phone's share sheet with a plain-text report for the week being viewed. If the phone can't share, it copies the report instead. The report includes:
+  - the week and block
+  - each habit: spent of limit, ✅ or ❌ over by $X
+  - times resisted
+  - the streak and money kept
+  - "Keep me honest."
+
+  There are no accounts, nothing is sent to a server, and you pick who gets it.
 - **Purchases:** that week's purchases, newest first, each with category, amount, and day/time, plus a trash button. Tapping trash asks "Delete this?" first. There's no edit. Delete it and log it again.
 
 ### 5. Plan
 - **The ladder:** blocks 1–6 (more if you're past 6), each with its percentage, its weekly limit for each category, and a status: **NOW**, **DONE**, or a ✓/✗ for each category in finished blocks. It also notes when a block's skip was used.
 - **Starting numbers:** the block-1 total for each category (marked "so far" during block 1), plus your best streak and money kept.
+- **At this pace:** for each habit, the yearly cost based on the last 4 finished, non-skipped weeks × 52, next to "was $X" (your old pace, starting number ÷ 4 × 52) and, if pay is set, the hours of work.
+- **Cost in hours:** a $/hour field. Once it's set, buys, resists and yearly pace also show as work time ("1.3 hours," "20 min"). Leave it blank to turn it off.
 - **Your data:**
   - **Saved on this phone:** the last save time.
   - **How many purchases are stored.**
@@ -80,9 +98,11 @@
 - **No reading of screenshots or receipts.** You type the amount.
 - **No connection to a bank or card.** It never sees your accounts.
 - **No logins or accounts, and no cloud.** Data stays in the phone's browser.
-- **No sharing** with friends or family, and no accountability partners.
+- **No in-app sharing network.** No friends list, no partner accounts, no leaderboards. Accountability is only the text report you send yourself through the phone's share sheet.
 - **Exactly two habits.** You can't add a third or remove one. You *can* rename them and change their emoji in Plan › Rename habits, and history and limits stay the same.
-- **No push notifications, reminders or alarms.**
+- **No push notifications, reminders or alarms.** The resist countdown only shows inside the app.
+- **No "danger time" or time-of-day patterns.** People often log a buy after the fact, so the logged time isn't reliable enough to find patterns in.
+- **No auto-sending.** The accountability text only goes out when you tap Send and pick the person yourself.
 - **No charts or graphs** beyond the progress rings on Home and the progress bars in History. No line charts, no trend graphs.
 - **No editing a purchase.** Delete it and log it again.
 - **No more than 1 skip per block.** Unused skips don't carry over to the next block.

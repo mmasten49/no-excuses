@@ -86,6 +86,20 @@
   .chip .v.bad { color: var(--red); }
   .chip .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
+  .chip.wide { grid-column: 1 / -1; margin-bottom: 12px; }
+  .banner { display: flex; align-items: center; gap: 10px; border-radius: 18px; padding: 14px 14px 14px 16px; margin-bottom: 12px; }
+  .banner > div { flex: 1; } .banner b { display: block; font-size: 15px; } .banner span { font-size: 13px; }
+  .banner.hold { background: var(--ink); color: #fff; } .banner.hold span { color: rgba(255,255,255,.8); }
+  .banner.hold .num { display: inline; font-size: 15px; color: #fff; }
+  .banner.share { background: var(--card); box-shadow: var(--shadow); } .banner.share span { color: var(--muted); }
+  .mini { padding: 9px 13px; border-radius: 11px; font-weight: 800; font-size: 14px; background: rgba(127,127,127,.18); white-space: nowrap; }
+  .banner.hold .mini { background: rgba(255,255,255,.16); color: #fff; }
+  .mini.red { background: var(--red); color: #fff; }
+  .worktime { text-align: center; font-size: 13px; font-weight: 700; color: var(--muted); margin: -6px 0 12px; }
+  .sharetext { white-space: pre-wrap; font-family: inherit; font-size: 14px; background: var(--card); border-radius: 12px; padding: 12px; user-select: all; }
+  .wage { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .wage input { flex: 1; font: inherit; font-size: 20px; font-weight: 800; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg); width: 100%; }
+  .wage input:focus { outline: none; border-color: var(--red); }
   .logrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 6px; }
   .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 17px 12px; border-radius: 16px; font-size: 17px; font-weight: 800; transition: transform .1s, background .2s; }
   .btn:active { transform: scale(.97); }
@@ -259,7 +273,11 @@
   var state = load();
 
   // ================= helpers =================
-  function money(n) { var v = Math.round(n * 100) / 100; return (v < 0 ? '-$' : '$') + Math.abs(v).toFixed(2).replace(/\.00$/, ''); }
+  function money(n) {
+    var v = Math.round(n * 100) / 100, parts = Math.abs(v).toFixed(2).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (v < 0 ? '-$' : '$') + (parts[1] === '00' ? parts[0] : parts.join('.'));
+  }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function md(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
   function wd(ts) { return new Date(ts).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
@@ -269,6 +287,33 @@
     var ms = Math.max(0, ts - Date.now()), d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
     return d > 0 ? d + 'd ' + h + 'h' : h > 0 ? h + 'h ' + m + 'm' : m + 'm';
   }
+  function clock(ms) { ms = Math.max(0, ms); var m = Math.floor(ms / 6e4), s = Math.floor(ms % 6e4 / 1000); return m + ':' + (s < 10 ? '0' : '') + s; }
+
+  // ---- accountability text ----
+  function markShared(ws) { state.sharedWeeks = state.sharedWeeks || []; if (state.sharedWeeks.indexOf(ws) === -1) state.sharedWeeks.push(ws); save(); }
+  function weekText(k) {
+    var now = Date.now(), w = NE.weekSummary(state, k, now), st = NE.stats(state, now);
+    var res = NE.resistStats(state, w.start, w.end);
+    var lines = ['No Excuses · ' + (w.isCurrent ? 'This week so far' : 'Week of ' + md(w.start)) + ' (Block ' + w.block + (w.pct ? ', ' + w.pct + '% limit' : ', measuring') + ')'];
+    if (w.skipped) lines.push('Skipped week.');
+    else NE.CATS.forEach(function (c) {
+      var x = w.cats[c];
+      var plainName = state.habits[c].name;
+      lines.push(E(c) + ' ' + plainName + ': ' + money(x.spent) + (x.limit !== null ? ' of ' + money(x.limit) + (x.under ? ' ✅' : ' ❌ over by ' + money(x.spent - x.limit)) : ''));
+    });
+    if (res.count) lines.push('✋ Resisted ' + res.count + (res.count === 1 ? ' time' : ' times') + ' (' + money(res.value) + ' not spent)');
+    if (st.weeksJudged) lines.push('🔥 Streak: ' + st.streak + ' wk' + (st.streak === 1 ? '' : 's') + ' · 💰 Kept ' + money(st.kept));
+    lines.push('Keep me honest.');
+    return lines.join('\n');
+  }
+  function shareWeek(k) {
+    var text = weekText(k), ws = NE.weekStart(state.startTs, k);
+    var done = function (msg) { markShared(ws); flash(msg, 'Accountability on'); render(); };
+    if (navigator.share) navigator.share({ text: text }).then(function () { done('Sent'); }).catch(function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { done('Copied'); }, function () { modal('<h3>Copy this</h3><pre class="sharetext">' + esc(text) + '</pre>', null, null, 'Done'); });
+    else modal('<h3>Copy this</h3><pre class="sharetext">' + esc(text) + '</pre>', null, null, 'Done');
+  }
+
   function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms || 12); } catch (e) {} }
 
   // ================= nav =================
@@ -380,6 +425,12 @@
         '<div class="chip"><div class="k">First limit</div><div class="v">Week 5</div><div class="s">at 90% of your number</div></div></div></div>';
       return;
     }
+    var won = NE.resolveResists(state, now);
+    if (won.length) {
+      save(); buzz([15, 40, 15]);
+      var w0 = won[won.length - 1];
+      setTimeout(function () { flash('You held off', '+' + money(w0.amount) + ' not spent on ' + L(w0.cat).toLowerCase()); }, 150);
+    }
     var st = NE.stats(state, now);
     var weekFrac = (now - r.weekStart) / (r.weekEnd - r.weekStart);
     var measuring = r.pct === null;
@@ -415,15 +466,59 @@
       '<div class="chips"><div class="chip"><div class="k">🔥 Streak</div><div class="v num">' + st.streak + ' wk' + (st.streak === 1 ? '' : 's') + '</div><div class="s">under the limit · best ' + st.best + '</div></div>' +
       '<div class="chip"><div class="k">💰 Money kept</div><div class="v num ' + (st.kept >= 0 ? 'good' : 'bad') + '">' + money(st.kept) + '</div><div class="s">vs. your old pace</div></div></div>';
 
-    var buttons = r.skipped ? '' : '<div class="logrow">' + NE.CATS.map(function (c) { return '<button class="btn btn-red" data-log="' + c + '">' + ICON.plus + L(c) + '</button>'; }).join('') + '</div>';
+    // ---- resist / share banners ----
+    var pending = (state.resists || []).filter(function (x) { return x.status === 'pending'; })[0];
+    var banners = '';
+    if (pending) {
+      banners += '<div class="banner hold"><div><b>✋ Holding off on ' + L(pending.cat) + '</b><span>Wait it out. <b class="num" id="rCount">' + clock(pending.until - now) + '</b> to go</span></div>' +
+        '<button class="mini" id="caved">I caved</button></div>';
+    }
+    var prevK = NE.weekIndex(state.startTs, now) - 1;
+    if (prevK >= 0 && now - r.weekStart < 2 * 864e5) {
+      var pw = NE.weekSummary(state, prevK, now);
+      if (!pw.skipped && (state.sharedWeeks || []).indexOf(pw.start) === -1)
+        banners += '<div class="banner share"><div><b>📲 New week</b><span>Send last week\'s numbers to the person who keeps you honest.</span></div>' +
+          '<button class="mini red" id="shareLast">Send</button><button class="mini" id="dismissShare" aria-label="Not now">✕</button></div>';
+    }
+
+    var weekRes = NE.resistStats(state, r.weekStart, r.weekEnd);
+    var resistChip = '<div class="chip wide"><div><div class="k">✋ Resisted this week</div><div class="v num">' + weekRes.count + (weekRes.count === 1 ? ' time' : ' times') +
+      '</div><div class="s">' + (weekRes.count ? money(weekRes.value) + ' you didn\'t spend' : 'Tap “I want one” when the urge hits') + '</div></div></div>';
+
+    var buttons = r.skipped ? '' : '<div class="logrow">' + NE.CATS.map(function (c) { return '<button class="btn btn-red" data-log="' + c + '">' + ICON.plus + L(c) + '</button>'; }).join('') + '</div>' +
+      (pending ? '' : '<button class="btn btn-ghost" id="resist" style="margin-top:10px">✋ I want one. Help me wait.</button>');
 
     var skip = '';
     if (r.skipped) skip = '<div class="skiprow"><button class="textbtn" id="undo">Undo skip</button></div>';
     else if (r.canSkip) skip = '<div class="skiprow">Break week? <button class="textbtn" id="skip">Skip this week</button> · 1 skip left this block</div>';
     else skip = '<div class="skiprow">' + (r.skipUsedThisBlock ? 'Skip used this block' : 'Skip only works before your first log of the week') + '</div>';
 
-    app.innerHTML = '<div class="view">' + head + cards + chips + buttons + skip + '</div>';
+    app.innerHTML = '<div class="view">' + head + banners + cards + chips + (r.skipped ? '' : resistChip) + buttons + skip + '</div>';
     animateRings();
+
+    if ($('resist')) $('resist').onclick = function () {
+      $('modalBody').innerHTML = '<h3>Which one?</h3><p class="muted" style="margin-top:0">Give it 10 minutes. Most urges pass. Walk away and it counts as a win.</p>' +
+        '<div class="stack">' + NE.CATS.map(function (c) {
+          var amt = NE.typicalBuy(state, c), wt = NE.workTime(amt, state.wage);
+          return '<button class="btn btn-ghost" data-rs="' + c + '">' + E(c) + ' ' + L(c) + ' <span class="muted" style="font-weight:600">· ~' + money(amt) + (wt ? ' · ' + wt + ' of work' : '') + '</span></button>';
+        }).join('') + '<button class="textbtn" id="rsNo">Never mind</button></div>';
+      $('modal').classList.remove('hidden');
+      $('rsNo').onclick = function () { $('modal').classList.add('hidden'); };
+      $('modalBody').querySelectorAll('[data-rs]').forEach(function (b) {
+        b.onclick = function () {
+          var c = b.getAttribute('data-rs'), t = Date.now();
+          state.resists = state.resists || [];
+          state.resists.push({ id: t + '-' + Math.random().toString(36).slice(2, 7), cat: c, ts: t, until: t + NE.RESIST_MS, amount: NE.typicalBuy(state, c), status: 'pending' });
+          save(); $('modal').classList.add('hidden'); buzz(20); render();
+        };
+      });
+    };
+    if ($('caved')) $('caved').onclick = function () {
+      pending.status = 'lost'; save(); buzz();
+      openSheet(pending.cat); amountStr = String(pending.amount); renderSheet(); render();
+    };
+    if ($('shareLast')) $('shareLast').onclick = function () { shareWeek(prevK); };
+    if ($('dismissShare')) $('dismissShare').onclick = function () { markShared(NE.weekStart(state.startTs, prevK)); render(); };
 
     app.querySelectorAll('[data-log]').forEach(function (b) { b.onclick = function () { buzz(); openSheet(b.getAttribute('data-log')); }; });
     if ($('skip')) $('skip').onclick = function () {
@@ -477,6 +572,7 @@
       '<div class="seg">' + NE.CATS.map(function (c) { return '<button data-cat="' + c + '" class="' + (c === sheetCat ? 'on' : '') + '">' + E(c) + ' ' + L(c) + '</button>'; }).join('') + '</div>' +
       '<div class="amount num"><small>$</small>' + esc(amountStr || '0') + '</div>' +
       '<div class="preview' + (ok ? ' ok' : '') + '">' + esc(preview) + '</div>' +
+      (amt > 0 && state.wage > 0 ? '<div class="worktime">= ' + NE.workTime(amt, state.wage) + ' of work</div>' : '') +
       '<div class="quick">' + NE.quickAmounts(state, sheetCat).map(function (q) { return '<button data-q="' + q + '">' + money(q) + '</button>'; }).join('') + '</div>' +
       '<div class="keypad">' + keys.map(function (k) { return '<button data-k="' + k + '" aria-label="' + (k === 'del' ? 'Delete' : k) + '">' + (k === 'del' ? ICON.back : k) + '</button>'; }).join('') + '</div>' +
       '<div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Cancel</button><button class="btn btn-red" id="saveBtn"' + (amt > 0 ? '' : ' disabled') + '>Save ' + (amt > 0 ? money(amt) : '') + '</button></div>';
@@ -502,6 +598,7 @@
       var a = Math.round((parseFloat(amountStr) || 0) * 100) / 100;
       if (!(a > 0)) return;
       state.purchases.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), cat: sheetCat, amount: a, ts: Date.now() });
+      (state.resists || []).forEach(function (x) { if (x.status === 'pending' && x.cat === sheetCat) x.status = 'lost'; });
       save(); closeSheet(); buzz([15, 40, 15]);
       var r2 = NE.compute(state, Date.now()), sub;
       if (r2.pct === null) sub = money(r2.cats[sheetCat].spentWeek) + ' on ' + L(sheetCat).toLowerCase() + ' this week';
@@ -544,12 +641,14 @@
       '<button class="navbtn" id="next" aria-label="Next week"' + (histK >= cur ? ' disabled' : '') + '>' + ICON.right + '</button></div>' +
       '<div class="card bars">' + bars + '</div>' +
       '<h2>Purchases</h2><div class="card" style="padding:4px 16px">' + items + '</div>' +
-      (w.isCurrent ? '' : '<button class="btn btn-ghost" id="today" style="margin-top:14px">Jump to this week</button>') + '</div>';
+      (w.skipped ? '' : '<button class="btn btn-ink" id="shareWk" style="margin-top:14px">📲 Send ' + (w.isCurrent ? 'this week so far' : 'this week') + '</button>') +
+      (w.isCurrent ? '' : '<button class="btn btn-ghost" id="today" style="margin-top:10px">Jump to this week</button>') + '</div>';
     animateRings();
 
     $('prev').onclick = function () { if (histK > 0) { histK--; buzz(); renderHistory(); } };
     $('next').onclick = function () { if (histK < cur) { histK++; buzz(); renderHistory(); } };
     if ($('today')) $('today').onclick = function () { histK = cur; renderHistory(); };
+    if ($('shareWk')) $('shareWk').onclick = function () { shareWeek(histK); };
     app.querySelectorAll('[data-del]').forEach(function (b) {
       b.onclick = function () {
         var id = b.getAttribute('data-del'), p = state.purchases.filter(function (x) { return x.id === id; })[0];
@@ -593,6 +692,19 @@
       NE.CATS.map(function (c) { return '<div class="kv"><span>' + E(c) + ' ' + L(c) + (bl.starts.final ? '' : ' <span class="small muted">(so far)</span>') + '</span><b class="num">' + money(bl.starts[c]) + '</b></div>'; }).join('') +
       (st && st.weeksJudged ? '<div class="kv"><span>🔥 Best streak</span><b>' + st.best + ' wk' + (st.best === 1 ? '' : 's') + '</b></div><div class="kv"><span>💰 Money kept</span><b class="num">' + money(st.kept) + '</b></div>' : '') + '</div>';
 
+    var pace = !r.started ? '' : (function () {
+      var rows = NE.CATS.map(function (c) {
+        var p = NE.yearlyPace(state, now, c);
+        if (!p) return '';
+        var wt = NE.workTime(p.now, state.wage);
+        return '<div class="kv"><span>' + E(c) + ' ' + L(c) + (p.old !== null ? ' <span class="small muted">was ' + money(p.old) + '</span>' : '') +
+          (wt ? '<br><span class="small muted">' + wt + ' of work</span>' : '') + '</span><b class="num">' + money(p.now) + '/yr</b></div>';
+      }).join('');
+      return rows ? '<h2>At this pace</h2><div class="card">' + rows + '<p class="small muted" style="margin:10px 0 0">Your last 4 finished weeks, times 52. Skipped weeks don\'t count.</p></div>' : '';
+    })();
+    var wage = '<h2>Cost in hours</h2><div class="card"><p class="muted" style="margin:0 0 6px">What do you make an hour? Every buy also shows how long you worked for it.</p>' +
+      '<div class="wage"><b style="font-size:20px">$</b><input id="wageIn" type="number" inputmode="decimal" min="0" step="0.25" placeholder="15.00" value="' + (state.wage > 0 ? state.wage : '') + '"><span class="muted">/ hour</span></div>' +
+      (state.wage > 0 ? '<p class="small muted" style="margin:10px 0 0">A ' + money(NE.typicalBuy(state, 'a')) + ' ' + L('a').toLowerCase() + ' buy = <b>' + NE.workTime(NE.typicalBuy(state, 'a'), state.wage) + '</b> of work.</p>' : '') + '</div>';
     var habits = '<h2>Your habits</h2><div class="card">' +
       NE.CATS.map(function (c) { return '<div class="kv"><span>' + E(c) + ' ' + L(c) + '</span></div>'; }).join('') +
       '<div class="stack"><button class="btn btn-ghost" id="editHabits">Rename habits</button></div></div>';
@@ -607,7 +719,12 @@
 
     app.innerHTML = '<div class="view"><h1>The plan</h1><p class="muted" style="margin-top:0">90% → 50%, one block at a time. Hit or miss, it keeps dropping.</p>' +
       (r.started ? '<div class="card" style="padding:4px 16px">' + ladder + '</div>' : '<div class="card empty">Starts ' + wd(state.startTs) + ', 8 AM.</div>') +
-      starts + habits + data + '</div>';
+      starts + pace + wage + habits + data + '</div>';
+
+    $('wageIn').onchange = function () {
+      var v = Math.round(parseFloat(this.value) * 100) / 100;
+      state.wage = v > 0 && v < 1000 ? v : null; save(); buzz(); renderPlan();
+    };
 
     $('editHabits').onclick = function () {
       var d = JSON.parse(JSON.stringify(state.habits));
@@ -641,7 +758,9 @@
       var obj; try { obj = NE.migrate(JSON.parse(rd.result)); } catch (err) { obj = null; }
       if (!NE.validBackup(obj)) { modal('<h3>That file won\'t work</h3><p class="muted">It isn\'t a No Excuses backup. Nothing was changed.</p>', null, null, 'OK'); return; }
       modal('<h3>Restore this backup?</h3><p class="muted">' + obj.purchases.length + ' purchases, plan starting ' + wd(obj.startTs) + '. This replaces what\'s on this phone now (' + state.purchases.length + ' purchases).</p>', 'Restore', function () {
-        state = { startTs: obj.startTs, habits: obj.habits, purchases: obj.purchases, skips: obj.skips || [], seenReport: obj.seenReport || 1, backupAt: obj.backupAt };
+        state = { startTs: obj.startTs, habits: obj.habits, purchases: obj.purchases,
+          resists: Array.isArray(obj.resists) ? obj.resists : [], sharedWeeks: Array.isArray(obj.sharedWeeks) ? obj.sharedWeeks : [],
+          wage: typeof obj.wage === 'number' && obj.wage > 0 ? obj.wage : null, skips: obj.skips || [], seenReport: obj.seenReport || 1, backupAt: obj.backupAt };
         save(); lastRing = {}; flash('Restored', obj.purchases.length + ' purchases'); go('home');
       });
     };
@@ -664,6 +783,15 @@
   if (state) askPersist();
   // Keep the clock honest (week reset, countdowns) while the app is open.
   setInterval(function () { if (state && tab === 'home' && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open')) render(); }, 60000);
+  // Live resist countdown. When it hits zero, re-render so the win gets counted.
+  setInterval(function () {
+    var el = $('rCount'); if (!el || !state) return;
+    var p = (state.resists || []).filter(function (x) { return x.status === 'pending'; })[0];
+    if (!p) return;
+    var left = p.until - Date.now();
+    el.textContent = clock(left);
+    if (left <= 0 && tab === 'home' && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open')) render();
+  }, 1000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && state && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open')) render(); });
 })();
 </script>
