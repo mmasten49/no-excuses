@@ -22,7 +22,8 @@
 - **Saved pill** in the top right corner: "✓ Saved 4:40 PM," showing the time of the last save. It turns red and says "Not saving" if the browser refuses to store data. Tap it to jump to "Your data" on Plan.
 
 ### 1. Setup (first open only)
-- **Step 1, Your two habits:** two name fields ("e.g. Pizza," "e.g. Coffee"), each with a row of 12 emoji to pick from. **Next** stays disabled until both names are filled in.
+- **Step 1, Your two habits:** two name fields ("e.g. Pizza," "e.g. Coffee"), each with a row of 12 emoji to pick from. Below them is an optional **Your why** field, up to 40 characters ("e.g. Spring break fund"). **Next** stays disabled until both habit names are filled in.
+- **On step 2, if this week's (already started) Monday is picked,** a red heads-up appears: buys from before today won't be logged, so the starting number may come out low. It recommends starting next Monday instead.
 - **Step 2:** a **‹ Back** link, then a short 3-step explanation of the plan, then a list of 5 Mondays (this week's, plus the next 4). Next Monday is preselected.
 - **Tap a Monday:** selects it.
 - **Tap "Start the plan":** saves and goes to Home. This screen never shows again.
@@ -33,6 +34,8 @@
 - **Two cards, Pizza and Cash.** Each one has a **progress ring** that fills as you spend toward the weekly limit. Inside the ring is the number of purchases left, which is the biggest text on the screen. Next to the ring:
   - **A headline:** "2 pizza trips left," "Last one this week," "Done for the week," or "Over by $12" (the card turns red when you're over).
   - **Dollars left:** "$18 of $54 left."
+  - **Pace warning:** if you've used at least half the limit **and** your share of the limit used is more than 25 points ahead of your share of the week gone by, a line appears: "⚠️ 81% used, 4 days in." It compares dollars against days, not purchase timestamps, so logging late doesn't break it. It's hidden once you're over the limit or out of buys.
+  - **If a habit has no average yet** (nothing logged in block 1), the headline shows "$X left this week" instead of a buy count.
   - **In block 1:** the ring shows how far through the week you are, the center shows dollars spent this week, and the headline shows dollars spent this block.
 - **Two stat tiles (block 2 and later):**
   - **🔥 Streak:** finished weeks in a row with both categories under the limit, plus your best streak.
@@ -41,7 +44,7 @@
 - **Two big buttons: + Pizza and + Cash.** Tapping one slides up the Log Purchase sheet.
 - **"✋ I want one. Help me wait." (the resist button):**
   - Tap it and pick the habit. Each option shows its usual cost, and the work time if your pay is set.
-  - A **10-minute countdown** banner appears at the top of Home, with an **I caved** button.
+  - A **10-minute countdown** banner appears at the top of Home, with an **I caved** button. If a why is set, the banner also says **"Remember: Spring break fund."**
   - **If the 10 minutes run out:** it's a win. A "You held off · +$21 not spent" confirmation shows, and it's added to the Resisted tile. The win is worth that habit's average buy ($20 until there's history).
   - **If you tap I caved, or log a buy of that habit during the countdown:** it's marked lost, and I caved opens the log sheet with the usual amount filled in.
   - The countdown keeps going if the app is closed. A win is counted the next time the app opens.
@@ -53,7 +56,8 @@
 ### 3. Log Purchase (a sheet that slides up from the bottom)
 - **Shows:** a Pizza / Cash switch, a big dollar amount, **3 quick-amount buttons** (your 3 most-used amounts for that category; until you have history, $15/$20/$25 for pizza and $20/$40/$60 for cash), and a number keypad. The date and time are filled in automatically.
 - **Before saving**, a line under the amount says what happens: "After this: 0 pizza buys left this week" or "This puts you over by $6." If your pay is set, a second line says **"= 1.3 hours of work."**
-- **Tap Save $19:** saves, closes the sheet, and shows a checkmark confirmation ("Logged $19 · 1 pizza trip left this week"). The phone vibrates on phones that support it.
+- **Tap Save $19:** saves, closes the sheet, and shows a checkmark confirmation ("Logged $19 · 1 Pizza buy left this week"). The phone vibrates on phones that support it.
+- **Undo bar:** for 6 seconds after saving, a bar above the tabs says "🍕 Pizza · $19 logged" with an **Undo** button. Undo removes that buy, and restores any resist countdown the buy had cancelled.
 - **Tap Cancel or the dark area behind the sheet:** closes it and saves nothing.
 
 ### 4. History
@@ -79,8 +83,13 @@
   - **How many purchases are stored.**
   - **Whether the browser has agreed to protect the data from automatic cleanup.**
   - **A plain-English explanation of what survives:** closing the app and restarting the phone. What doesn't: clearing browser data or switching browsers.
-  - **Download backup:** saves a `.json` file with everything to the phone's Files.
+  - **Download backup:** saves a `.json` file with everything. On phones that support sharing files, it opens the share sheet ("Save to Files," AirDrop, etc.), which works better than a download from a home-screen app. Otherwise it downloads the file.
   - **Restore from backup:** pick that file, see what it contains, confirm, and it replaces what's on the phone. A file that isn't a valid backup is rejected and nothing changes.
+
+### Installing and offline use
+- **Add to Home Screen** gives a real app icon (a red "NE." square) and opens full screen, with no browser bars.
+- **Works offline after the first visit.** A service worker keeps a copy of the app. It always tries the network first, so updates show up when you're online, and falls back to the saved copy when there's no signal.
+- **The Plan tab's habits card** shows the two habits and your why. **Edit habits & why** changes the names, the emoji and the why.
 
 ## How the numbers work
 - **Week:** Monday 8:00 AM to the next Monday 8:00 AM.

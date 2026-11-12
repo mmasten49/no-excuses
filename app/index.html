@@ -7,6 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="No Excuses">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>No Excuses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -206,6 +210,13 @@
   @keyframes up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
   .modal h3 { font-size: 22px; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px; }
   .modal .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+  .toast { position: fixed; left: 50%; bottom: calc(var(--tabh) + env(safe-area-inset-bottom) + 14px); z-index: 25; transform: translate(-50%, 140%); opacity: 0;
+    width: min(440px, calc(100% - 32px)); background: var(--ink); color: #fff; border-radius: 16px; padding: 12px 12px 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-size: 14px; font-weight: 600; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .3s; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  .toast button { background: rgba(255,255,255,.16); color: #fff; font-weight: 800; padding: 9px 14px; border-radius: 10px; }
+  .pace { margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--red-dark); }
+  .banner .why { display: block; margin-top: 4px; font-weight: 700; color: #fff !important; }
   .hidden { display: none !important; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
@@ -222,6 +233,7 @@
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-label="Log a purchase"><div class="sheet-in" id="sheetBody"></div></div>
 <div class="success" id="success"><div class="box"><div class="check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><b id="sTitle"></b><span id="sSub"></span></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="modal" class="modal-wrap hidden"><div class="modal" id="modalBody"></div></div>
 <input type="file" id="restoreFile" accept="application/json,.json" class="hidden">
 
@@ -235,7 +247,9 @@
   var app = $('app');
   // The two habits are named by the user at setup. Slots are 'a' and 'b'.
   var EMOJIS = ['🍕', '☕', '🍔', '🥤', '🍩', '🌮', '🛍️', '💵', '🎮', '🍺', '🚕', '📦'];
-  function L(c) { return esc(state && state.habits && state.habits[c] ? state.habits[c].name : (c === 'a' ? 'Habit 1' : 'Habit 2')); }
+  // Lraw = plain text (for textContent / share text). L = HTML-escaped (for innerHTML).
+  function Lraw(c) { return state && state.habits && state.habits[c] ? state.habits[c].name : (c === 'a' ? 'Habit 1' : 'Habit 2'); }
+  function L(c) { return esc(Lraw(c)); }
   function E(c) { return state && state.habits && state.habits[c] ? state.habits[c].emoji : '•'; }
   var ICON = {
     left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -282,11 +296,13 @@
   function md(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
   function wd(ts) { return new Date(ts).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
   function tm(ts) { return new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
-  function trips(cat, n) { return n + ' ' + L(cat).toLowerCase() + ' buy' + (n === 1 ? '' : 's'); }
+  // Plain text. Escape it before putting it in innerHTML.
+  function trips(cat, n) { return n + ' ' + Lraw(cat) + ' buy' + (n === 1 ? '' : 's'); }
   function until(ts) {
     var ms = Math.max(0, ts - Date.now()), d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
     return d > 0 ? d + 'd ' + h + 'h' : h > 0 ? h + 'h ' + m + 'm' : m + 'm';
   }
+  function daysIn(frac) { var d = Math.max(1, Math.ceil(frac * 7)); return d + (d === 1 ? ' day' : ' days'); }
   function clock(ms) { ms = Math.max(0, ms); var m = Math.floor(ms / 6e4), s = Math.floor(ms % 6e4 / 1000); return m + ':' + (s < 10 ? '0' : '') + s; }
 
   // ---- accountability text ----
@@ -303,6 +319,7 @@
     });
     if (res.count) lines.push('✋ Resisted ' + res.count + (res.count === 1 ? ' time' : ' times') + ' (' + money(res.value) + ' not spent)');
     if (st.weeksJudged) lines.push('🔥 Streak: ' + st.streak + ' wk' + (st.streak === 1 ? '' : 's') + ' · 💰 Kept ' + money(st.kept));
+    if (state.why) lines.push('Why: ' + state.why);
     lines.push('Keep me honest.');
     return lines.join('\n');
   }
@@ -369,8 +386,11 @@
         '<h1>Pick the two habits<br>you want to cut.</h1>' +
         '<p class="muted">The small buys that add up without you noticing. Food runs, coffee, delivery, whatever yours are.</p>' +
         habitFields(draft) +
+        '<div class="card" style="padding:14px"><div class="label" style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Your why <span style="text-transform:none;letter-spacing:0;font-weight:600">(optional)</span></div>' +
+        '<input class="hname" id="whyIn" maxlength="40" placeholder="e.g. Spring break fund" value="' + esc(draft.why || '') + '" style="font-size:17px;margin-bottom:4px"></div>' +
         '<button class="btn btn-red" id="next1" style="margin-top:6px"' + (habitsValid(draft) ? '' : ' disabled') + '>Next</button></div>';
       wireHabitFields(app, draft, function () { $('next1').disabled = !habitsValid(draft); });
+      $('whyIn').oninput = function () { draft.why = this.value; };
       $('next1').onclick = function () { if (habitsValid(draft)) { setupStep = 2; buzz(); renderSetup(); window.scrollTo(0, 0); } };
       return;
     }
@@ -387,15 +407,16 @@
       '</ol>' +
       '<div class="mondays">' + opts.slice(0, 5).map(function (ts, i) {
         return '<button class="monday' + (ts === pickTs ? ' on' : '') + '" data-ts="' + ts + '">Monday, ' + md(ts) +
-          '<span>' + (i === 0 ? 'This week (already started)' : i === 1 ? 'Next Monday · 8 AM' : 'in ' + i + ' weeks') + '</span></button>';
+          '<span>' + (i === 0 ? 'Already started: partial week' : i === 1 ? 'Next Monday · 8 AM' : 'in ' + i + ' weeks') + '</span></button>';
       }).join('') + '</div>' +
+      (pickTs === opts[0] ? '<p class="small" style="color:var(--red-dark);font-weight:600;margin:-6px 0 14px">Heads-up: this week already started. Buys from before today won\'t be logged, so your starting number may come out low and your limits too tight. Next Monday is the honest start.</p>' : '') +
       '<button class="btn btn-red" id="go">Start the plan</button>' +
       '<p class="small muted" style="text-align:center">Everything stays on this phone. No account, no sign-up.</p>' +
     '</div>';
     app.querySelectorAll('[data-ts]').forEach(function (b) { b.onclick = function () { pickTs = Number(b.getAttribute('data-ts')); buzz(); renderSetup(); }; });
     $('back1').onclick = function () { setupStep = 1; renderSetup(); };
     $('go').onclick = function () {
-      state = { startTs: pickTs, habits: cleanHabits(draft), purchases: [], skips: [], seenReport: 1 };
+      state = { startTs: pickTs, habits: cleanHabits(draft), why: (draft.why || '').trim().slice(0, 40), purchases: [], skips: [], seenReport: 1 };
       save(); tab = 'home'; buzz(20); render();
     };
   }
@@ -429,7 +450,7 @@
     if (won.length) {
       save(); buzz([15, 40, 15]);
       var w0 = won[won.length - 1];
-      setTimeout(function () { flash('You held off', '+' + money(w0.amount) + ' not spent on ' + L(w0.cat).toLowerCase()); }, 150);
+      setTimeout(function () { flash('You held off', '+' + money(w0.amount) + ' not spent on ' + Lraw(w0.cat)); }, 150);
     }
     var st = NE.stats(state, now);
     var weekFrac = (now - r.weekStart) / (r.weekEnd - r.weekStart);
@@ -455,10 +476,16 @@
         var over = i.over > 0, used = i.limit > 0 ? i.spentWeek / i.limit : (i.spentWeek > 0 ? 1 : 0);
         var big = i.tripsLeft === null ? money(Math.max(0, i.left)) : String(i.tripsLeft);
         var small = i.tripsLeft === null ? 'left' : 'buy' + (i.tripsLeft === 1 ? '' : 's') + ' left';
-        var headTxt = over ? 'Over by ' + money(i.over) : i.tripsLeft === 0 ? 'Done for the week' : i.tripsLeft === 1 ? 'Last one this week' : trips(c, i.tripsLeft) + ' left';
+        var headTxt = over ? 'Over by ' + money(i.over)
+          : i.left <= 0 || i.tripsLeft === 0 ? 'Done for the week'
+          : i.tripsLeft === null ? money(i.left) + ' left this week'
+          : i.tripsLeft === 1 ? 'Last one this week' : trips(c, i.tripsLeft) + ' left';
+        // Pace warning: using the limit much faster than the week is passing. Dollars vs. days, not purchase timestamps.
+        var pace = !over && i.tripsLeft !== 0 && i.limit > 0 && used >= 0.5 && used > weekFrac + 0.25
+          ? '<div class="pace">⚠️ ' + Math.round(used * 100) + '% used, ' + daysIn(weekFrac) + ' in</div>' : '';
         return '<div class="card cat' + (over ? ' over' : '') + '">' + ring(c, used, false, big, small) +
-          '<div><div class="label">' + E(c) + ' ' + L(c) + '</div><div class="head' + (over || i.tripsLeft === 0 ? ' red' : '') + '">' + headTxt + '</div>' +
-          '<div class="sub"><b class="num">' + money(Math.max(0, i.left)) + '</b> of ' + money(i.limit) + ' left</div></div></div>';
+          '<div><div class="label">' + E(c) + ' ' + L(c) + '</div><div class="head' + (over || i.tripsLeft === 0 || i.left <= 0 ? ' red' : '') + '">' + esc(headTxt) + '</div>' +
+          '<div class="sub"><b class="num">' + money(Math.max(0, i.left)) + '</b> of ' + money(i.limit) + ' left</div>' + pace + '</div></div>';
       }).join('');
     }
 
@@ -470,7 +497,8 @@
     var pending = (state.resists || []).filter(function (x) { return x.status === 'pending'; })[0];
     var banners = '';
     if (pending) {
-      banners += '<div class="banner hold"><div><b>✋ Holding off on ' + L(pending.cat) + '</b><span>Wait it out. <b class="num" id="rCount">' + clock(pending.until - now) + '</b> to go</span></div>' +
+      banners += '<div class="banner hold"><div><b>✋ Holding off on ' + L(pending.cat) + '</b><span>Wait it out. <b class="num" id="rCount">' + clock(pending.until - now) + '</b> to go</span>' +
+        (state.why ? '<span class="why">Remember: ' + esc(state.why) + '</span>' : '') + '</div>' +
         '<button class="mini" id="caved">I caved</button></div>';
     }
     var prevK = NE.weekIndex(state.startTs, now) - 1;
@@ -597,15 +625,31 @@
     $('saveBtn').onclick = function () {
       var a = Math.round((parseFloat(amountStr) || 0) * 100) / 100;
       if (!(a > 0)) return;
-      state.purchases.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), cat: sheetCat, amount: a, ts: Date.now() });
-      (state.resists || []).forEach(function (x) { if (x.status === 'pending' && x.cat === sheetCat) x.status = 'lost'; });
+      var newId = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+      state.purchases.push({ id: newId, cat: sheetCat, amount: a, ts: Date.now() });
+      var lostIds = [];
+      (state.resists || []).forEach(function (x) { if (x.status === 'pending' && x.cat === sheetCat) { x.status = 'lost'; lostIds.push(x.id); } });
       save(); closeSheet(); buzz([15, 40, 15]);
       var r2 = NE.compute(state, Date.now()), sub;
-      if (r2.pct === null) sub = money(r2.cats[sheetCat].spentWeek) + ' on ' + L(sheetCat).toLowerCase() + ' this week';
+      if (r2.pct === null) sub = money(r2.cats[sheetCat].spentWeek) + ' on ' + Lraw(sheetCat) + ' this week';
       else { var i2 = r2.cats[sheetCat]; sub = i2.over > 0 ? 'Over by ' + money(i2.over) + ' this week' : trips(sheetCat, i2.tripsLeft || 0) + ' left this week'; }
       flash('Logged ' + money(a), sub);
+      // Undo for 6 seconds: removes the buy and puts back any resist it cancelled.
+      toast(E(sheetCat) + ' ' + L(sheetCat) + ' · ' + money(a) + ' logged', function () {
+        state.purchases = state.purchases.filter(function (p) { return p.id !== newId; });
+        (state.resists || []).forEach(function (x) { if (lostIds.indexOf(x.id) !== -1) x.status = Date.now() >= x.until ? 'won' : 'pending'; });
+        save(); render(); flash('Undone', 'That buy was removed');
+      });
       tab = 'home'; render();
     };
+  }
+
+  function toast(html, onUndo) {
+    var t = $('toast');
+    t.innerHTML = '<span>' + html + '</span><button id="undoBtn">Undo</button>';
+    t.classList.add('show');
+    clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('show'); }, 6000);
+    $('undoBtn').onclick = function () { clearTimeout(toast.t); t.classList.remove('show'); buzz(); onUndo(); };
   }
 
   function flash(title, sub) {
@@ -621,7 +665,7 @@
     if (histK === null || histK > cur) histK = cur;
     var w = NE.weekSummary(state, histK, now);
     var title = w.isCurrent ? 'This week' : histK === cur - 1 ? 'Last week' : 'Week of ' + md(w.start);
-    var subtitle = md(w.start) + ' – ' + md(w.end - 1) + ' · Block ' + w.block + (w.skipped ? ' · skipped' : ' · week ' + w.weekInBlock);
+    var subtitle = md(w.start) + ' – ' + md(w.end - 864e5) + ' · Block ' + w.block + (w.skipped ? ' · skipped' : ' · week ' + w.weekInBlock);
 
     var bars = w.skipped ? '<div class="empty">🏖️ Skipped week. It doesn\'t count.</div>' : NE.CATS.map(function (c) {
       var x = w.cats[c], has = x.limit !== null, frac = has ? (x.limit > 0 ? x.spent / x.limit : (x.spent > 0 ? 1 : 0)) : 0;
@@ -704,10 +748,11 @@
     })();
     var wage = '<h2>Cost in hours</h2><div class="card"><p class="muted" style="margin:0 0 6px">What do you make an hour? Every buy also shows how long you worked for it.</p>' +
       '<div class="wage"><b style="font-size:20px">$</b><input id="wageIn" type="number" inputmode="decimal" min="0" step="0.25" placeholder="15.00" value="' + (state.wage > 0 ? state.wage : '') + '"><span class="muted">/ hour</span></div>' +
-      (state.wage > 0 ? '<p class="small muted" style="margin:10px 0 0">A ' + money(NE.typicalBuy(state, 'a')) + ' ' + L('a').toLowerCase() + ' buy = <b>' + NE.workTime(NE.typicalBuy(state, 'a'), state.wage) + '</b> of work.</p>' : '') + '</div>';
+      (state.wage > 0 ? '<p class="small muted" style="margin:10px 0 0">A ' + money(NE.typicalBuy(state, 'a')) + ' ' + L('a') + ' buy = <b>' + NE.workTime(NE.typicalBuy(state, 'a'), state.wage) + '</b> of work.</p>' : '') + '</div>';
     var habits = '<h2>Your habits</h2><div class="card">' +
       NE.CATS.map(function (c) { return '<div class="kv"><span>' + E(c) + ' ' + L(c) + '</span></div>'; }).join('') +
-      '<div class="stack"><button class="btn btn-ghost" id="editHabits">Rename habits</button></div></div>';
+      '<div class="kv"><span>Your why</span><b>' + (state.why ? esc(state.why) : '<span class="muted" style="font-weight:600">Not set</span>') + '</b></div>' +
+      '<div class="stack"><button class="btn btn-ghost" id="editHabits">Edit habits &amp; why</button></div></div>';
     var count = state.purchases.length;
     var data = '<h2 id="dataCard">Your data</h2><div class="card">' +
       '<div class="kv"><span>Saved on this phone</span><b style="color:' + (storageOK ? 'var(--green)' : 'var(--red)') + '">' + (storageOK ? '✓ ' + (state.savedAt ? wd(state.savedAt) + ' ' + tm(state.savedAt) : 'Yes') : 'Not saving') + '</b></div>' +
@@ -728,12 +773,14 @@
 
     $('editHabits').onclick = function () {
       var d = JSON.parse(JSON.stringify(state.habits));
-      $('modalBody').innerHTML = '<h3>Rename habits</h3><p class="muted" style="margin-top:0">Your history and limits stay the same. Only the names change.</p>' + habitFields(d) +
+      $('modalBody').innerHTML = '<h3>Habits &amp; your why</h3><p class="muted" style="margin-top:0">Your history and limits stay the same. Only the names change.</p>' + habitFields(d) +
+        '<div class="card" style="padding:14px"><div class="label" style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Your why</div>' +
+        '<input class="hname" id="whyEdit" maxlength="40" placeholder="e.g. Spring break fund" value="' + esc(state.why || '') + '" style="font-size:17px;margin-bottom:4px"></div>' +
         '<div class="actions"><button class="btn btn-ghost" id="hNo">Cancel</button><button class="btn btn-red" id="hYes">Save</button></div>';
       $('modal').classList.remove('hidden');
       wireHabitFields($('modalBody'), d, function () { $('hYes').disabled = !habitsValid(d); });
       $('hNo').onclick = function () { $('modal').classList.add('hidden'); };
-      $('hYes').onclick = function () { if (!habitsValid(d)) return; state.habits = cleanHabits(d); save(); $('modal').classList.add('hidden'); renderPlan(); };
+      $('hYes').onclick = function () { if (!habitsValid(d)) return; state.habits = cleanHabits(d); state.why = $('whyEdit').value.trim().slice(0, 40); save(); $('modal').classList.add('hidden'); renderPlan(); };
     };
     $('backup').onclick = downloadBackup;
     $('restore').onclick = function () { $('restoreFile').value = ''; $('restoreFile').click(); };
@@ -741,15 +788,28 @@
   }
 
   function downloadBackup() {
-    state.backupAt = Date.now(); save();
-    var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-    var a = document.createElement('a'), d = new Date();
-    a.href = URL.createObjectURL(blob);
-    a.download = 'no-excuses-backup-' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '.json';
+    var d = new Date();
+    var name = 'no-excuses-backup-' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '.json';
+    var json = JSON.stringify(Object.assign({}, state, { backupAt: Date.now() }), null, 2);
+    var done = function () { state.backupAt = Date.now(); save(); flash('Backup saved', 'Keep it in Files or iCloud'); renderPlan(); };
+    // Phones: the share sheet ("Save to Files") is more reliable than a download, especially from a home-screen app.
+    var file = null;
+    try { file = new File([json], name, { type: 'application/json' }); } catch (e) {}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: 'No Excuses backup' }).then(done).catch(function (err) {
+        if (err && err.name !== 'AbortError') plainDownload(json, name, done);
+      });
+      return;
+    }
+    plainDownload(json, name, done);
+  }
+  function plainDownload(json, name, done) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-    flash('Backup saved', 'Keep it in Files or iCloud');
-    renderPlan();
+    done();
   }
   $('restoreFile').onchange = function (e) {
     var f = e.target.files && e.target.files[0]; if (!f) return;
@@ -760,7 +820,8 @@
       modal('<h3>Restore this backup?</h3><p class="muted">' + obj.purchases.length + ' purchases, plan starting ' + wd(obj.startTs) + '. This replaces what\'s on this phone now (' + state.purchases.length + ' purchases).</p>', 'Restore', function () {
         state = { startTs: obj.startTs, habits: obj.habits, purchases: obj.purchases,
           resists: Array.isArray(obj.resists) ? obj.resists : [], sharedWeeks: Array.isArray(obj.sharedWeeks) ? obj.sharedWeeks : [],
-          wage: typeof obj.wage === 'number' && obj.wage > 0 ? obj.wage : null, skips: obj.skips || [], seenReport: obj.seenReport || 1, backupAt: obj.backupAt };
+          wage: typeof obj.wage === 'number' && obj.wage > 0 ? obj.wage : null,
+          why: typeof obj.why === 'string' ? obj.why.slice(0, 40) : '', skips: obj.skips || [], seenReport: obj.seenReport || 1, backupAt: obj.backupAt };
         save(); lastRing = {}; flash('Restored', obj.purchases.length + ' purchases'); go('home');
       });
     };
@@ -781,6 +842,8 @@
 
   render();
   if (state) askPersist();
+  // Offline support: works at the counter even with no signal. Service workers need https (GitHub Pages) or localhost.
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
   // Keep the clock honest (week reset, countdowns) while the app is open.
   setInterval(function () { if (state && tab === 'home' && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open')) render(); }, 60000);
   // Live resist countdown. When it hits zero, re-render so the win gets counted.
