@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No Excuses</title>
+<meta name="description" content="Log every pizza run and cash purchase in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #FAF7F2; --ink: #1A1A1A; --muted: #6B6560; --line: #E6E0D8; --red: #D7392B; --red-soft: #FBE9E7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+  .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
+  .brand span { color: var(--red); }
+  h1 { font-size: clamp(36px, 8vw, 60px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; margin: 40px 0 16px; }
+  .sub { font-size: clamp(18px, 3.6vw, 21px); line-height: 1.45; color: var(--muted); margin: 0 0 28px; max-width: 34em; }
+  .cta { display: inline-block; background: var(--red); color: #fff; text-decoration: none; font-weight: 800; font-size: 18px; padding: 16px 26px; border-radius: 14px; }
+  .cta-note { display: block; margin-top: 10px; font-size: 14px; color: var(--muted); }
+
+  /* phone mockup of the Home screen */
+  .phone { width: 260px; margin: 48px auto 8px; border: 10px solid var(--ink); border-radius: 38px; background: var(--bg); padding: 18px 14px 20px; }
+  .phone .p-brand { font-weight: 800; font-size: 13px; }
+  .phone .p-top { font-size: 11px; color: var(--muted); font-weight: 600; margin: 2px 0 10px; }
+  .phone .p-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 8px; }
+  .phone .p-label { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .phone .p-big { font-size: 24px; font-weight: 800; color: var(--red); letter-spacing: -0.02em; margin: 2px 0; }
+  .phone .p-small { font-size: 12px; }
+  .phone .p-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .phone .p-btns div { background: var(--red); color: #fff; text-align: center; font-weight: 800; font-size: 13px; padding: 10px 0; border-radius: 10px; }
+
+  section { margin-top: 64px; }
+  h2 { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 16px; }
+  blockquote { margin: 0; padding: 0 0 0 20px; border-left: 4px solid var(--red); font-size: clamp(19px, 3.8vw, 23px); line-height: 1.45; font-weight: 600; }
+  .points { list-style: none; padding: 0; margin: 0; counter-reset: n; }
+  .points li { counter-increment: n; display: grid; grid-template-columns: 44px 1fr; gap: 8px; padding: 18px 0; border-top: 1px solid var(--line); font-size: 18px; line-height: 1.45; }
+  .points li::before { content: counter(n); font-weight: 800; font-size: 28px; color: var(--red); line-height: 1; }
+  .points b { display: block; font-size: 20px; margin-bottom: 2px; }
+  .final { text-align: center; padding: 40px 0 0; border-top: 2px solid var(--ink); }
+  .final p { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 20px; }
+  footer { margin-top: 56px; font-size: 13px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">No Excuses<span>.</span></div>
+
+  <h1>Cut your habit spending in half. No excuses.</h1>
+  <p class="sub">Log every pizza run and cash purchase in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.</p>
+  <a class="cta" href="../app/index.html">Log your last pizza run</a>
+  <span class="cta-note">Open it on your phone. It takes under 30 seconds.</span>
+
+  <div class="phone" aria-label="The No Excuses home screen">
+    <div class="p-brand">No Excuses</div>
+    <div class="p-top">Block 2 · Week 3 of 4 · Limit 90%</div>
+    <div class="p-card"><div class="p-label">Pizza</div><div class="p-big">1 pizza trip left</div><div class="p-small">$18 of $54 left</div></div>
+    <div class="p-card"><div class="p-label">Cash</div><div class="p-big">2 cash purchases left</div><div class="p-small">$27 of $31.50 left</div></div>
+    <div class="p-btns"><div>+ Pizza</div><div>+ Cash</div></div>
+  </div>
+
+  <section>
+    <h2>The problem</h2>
+    <blockquote>"Honestly, I have no clue what I spend on pizza. I go two to four times a week, it's like twenty bucks each time, and it never feels like a lot, so I just don't add it up. Same with cash. I cut back once because the people close to me got on me about it, but nobody's doing that for pizza. I'm guessing it's somewhere between $260 and $600 a month, and I genuinely can't tell you which."</blockquote>
+  </section>
+
+  <section>
+    <h2>How it helps</h2>
+    <ol class="points">
+      <li><div><b>You see the real number.</b>Spend the first four weeks just logging, so you learn what you actually spend instead of guessing.</div></li>
+      <li><div><b>You see how many trips you have left before you buy.</b>The app turns your weekly limit into "1 pizza trip left," so you feel the limit before you spend, not after.</div></li>
+      <li><div><b>The limit drops whether you're ready or not.</b>Every four weeks it falls by 10% of your starting number, until you're at half. Missing a target doesn't slow it down.</div></li>
+    </ol>
+  </section>
+
+  <section class="final">
+    <p>Start with the last one you bought.</p>
+    <a class="cta" href="../app/index.html">Log your last pizza run</a>
+  </section>
+
+  <footer>No Excuses · MGMT 342 Module 4 · Your data stays on your phone.</footer>
+</div>
+</body>
+</html>
