@@ -4,295 +4,667 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FAF7F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="No Excuses">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>No Excuses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FAF7F2; --ink: #1A1A1A; --muted: #6B6560; --line: #E6E0D8;
-    --card: #FFFFFF; --red: #D7392B; --red-soft: #FBE9E7;
+    --bg: #FAF7F2; --ink: #1A1A1A; --muted: #6B6560; --faint: #A39C94; --line: #ECE6DE;
+    --card: #FFFFFF; --red: #D7392B; --red-dark: #B42A1E; --red-soft: #FBE9E7; --green: #1F8A4C; --green-soft: #E5F4EA;
+    --shadow: 0 1px 2px rgba(26,26,26,.04), 0 8px 24px rgba(26,26,26,.06);
+    --tabh: 64px;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--ink);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-  main { max-width: 440px; margin: 0 auto; padding: 20px 16px 40px; min-height: 100vh; }
-  h1 { font-size: 28px; font-weight: 800; margin: 8px 0 4px; letter-spacing: -0.02em; }
-  h2 { font-size: 20px; font-weight: 800; margin: 0 0 12px; }
-  p { line-height: 1.45; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { overscroll-behavior-y: none; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; border-radius: 8px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- shell ---------- */
+  header { position: sticky; top: 0; z-index: 5; background: rgba(250,247,242,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    padding: calc(env(safe-area-inset-top) + 12px) 16px 10px; }
+  .hbar { max-width: 480px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-weight: 900; font-size: 19px; letter-spacing: -0.03em; }
+  .brand i { color: var(--red); font-style: normal; }
+  .saved { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--green);
+    background: var(--green-soft); padding: 6px 10px; border-radius: 999px; }
+  .saved.warn { color: var(--red-dark); background: var(--red-soft); }
+  .saved svg { width: 13px; height: 13px; }
+  main { max-width: 480px; margin: 0 auto; padding: 4px 16px calc(var(--tabh) + env(safe-area-inset-bottom) + 28px); }
+  .view { animation: in .28s ease both; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: rgba(255,255,255,.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  .tabrow { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); height: var(--tabh); }
+  .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--faint); }
+  .tab svg { width: 24px; height: 24px; }
+  .tab.on { color: var(--red); }
+
+  /* ---------- type ---------- */
+  h1 { font-size: 30px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.05; margin: 10px 0 6px; }
+  h2 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin: 26px 0 10px; }
+  p { line-height: 1.5; }
   .muted { color: var(--muted); }
-  .small { font-size: 14px; }
-  .topline { font-size: 14px; font-weight: 600; color: var(--muted); margin: 0 0 16px; }
-  .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
-  button { font: inherit; cursor: pointer; border: 0; }
-  .btn { display: block; width: 100%; padding: 16px; border-radius: 14px; font-size: 18px; font-weight: 800; }
-  .btn-red { background: var(--red); color: #fff; }
-  .btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--ink); }
-  .btn:disabled { opacity: .35; cursor: default; }
-  .link { background: none; color: var(--ink); text-decoration: underline; padding: 8px 0; font-size: 15px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 12px; }
-  .card.over { background: var(--red-soft); border-color: var(--red); }
-  .card .label { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .card .big { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; margin: 6px 0 2px; color: var(--red); }
-  .card .big.ink { color: var(--ink); }
-  .card .sub { font-size: 16px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 8px; }
-  .links { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
-  select { width: 100%; font: inherit; font-size: 18px; padding: 14px; border-radius: 12px; border: 2px solid var(--ink); background: #fff; margin: 12px 0 16px; }
-  .amount { font-size: 56px; font-weight: 800; text-align: center; margin: 12px 0 4px; letter-spacing: -0.03em; }
-  .preview { text-align: center; min-height: 22px; font-weight: 600; color: var(--red); margin-bottom: 12px; }
-  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-  .keypad button { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 0; font-size: 24px; font-weight: 600; }
+  .small { font-size: 13px; }
+
+  /* ---------- home ---------- */
+  .status { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin: 6px 0 14px; }
+  .status .lvl { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .status .lvl b { display: block; font-size: 26px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); white-space: nowrap; }
+  .weekbar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 16px; }
+  .weekbar span { display: block; height: 100%; background: var(--ink); border-radius: 99px; transition: width .8s cubic-bezier(.2,.8,.2,1); }
+
+  .card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 18px; margin-bottom: 12px; }
+  .cat { display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: center; }
+  .cat.over { background: var(--red-soft); }
+  .ring { position: relative; width: 112px; height: 112px; }
+  .ring svg { width: 112px; height: 112px; transform: rotate(-90deg); }
+  .ring .track { stroke: var(--line); }
+  .ring .fill { stroke: var(--red); stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+  .ring .fill.ink { stroke: var(--ink); }
+  .ring .mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .ring .mid b { font-size: 34px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
+  .ring .mid span { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 3px; }
+  .cat .label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+  .cat .head { font-size: 22px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.12; margin: 4px 0 6px; }
+  .cat .head.red { color: var(--red); }
+  .cat .sub { font-size: 14px; color: var(--muted); }
+  .cat .sub b { color: var(--ink); }
+
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 12px; }
+  .chip { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 14px; }
+  .chip .k { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .chip .v { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; margin-top: 4px; }
+  .chip .v.good { color: var(--green); }
+  .chip .v.bad { color: var(--red); }
+  .chip .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .logrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 6px; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 17px 12px; border-radius: 16px; font-size: 17px; font-weight: 800; transition: transform .1s, background .2s; }
+  .btn:active { transform: scale(.97); }
+  .btn-red { background: var(--red); color: #fff; box-shadow: 0 6px 18px rgba(215,57,43,.28); }
+  .btn-red:active { background: var(--red-dark); }
+  .btn-ink { background: var(--ink); color: #fff; }
+  .btn-ghost { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .btn:disabled { opacity: .35; box-shadow: none; }
+  .btn svg { width: 20px; height: 20px; }
+  .textbtn { font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; padding: 10px 0; }
+  .skiprow { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+  /* ---------- history ---------- */
+  .weeknav { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; margin: 8px 0 14px; }
+  .navbtn { width: 48px; height: 48px; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; }
+  .navbtn svg { width: 22px; height: 22px; }
+  .navbtn:disabled { opacity: .3; box-shadow: none; }
+  .weeknav .t { text-align: center; }
+  .weeknav .t b { display: block; font-size: 18px; font-weight: 900; letter-spacing: -0.02em; }
+  .weeknav .t span { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .bars .row { margin-bottom: 14px; }
+  .bars .top { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .bars .top .ok { color: var(--green); } .bars .top .no { color: var(--red); }
+  .bar { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; position: relative; }
+  .bar span { display: block; height: 100%; border-radius: 99px; background: var(--ink); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+  .bar span.red { background: var(--red); }
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { display: flex; align-items: center; gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--line); }
+  .list li:last-child { border-bottom: 0; }
+  .dot { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; }
+  .dot.a { background: var(--red-soft); } .dot.b { background: var(--green-soft); }
+  .list .what { flex: 1; } .list .what b { display: block; font-size: 15px; } .list .what span { font-size: 12px; color: var(--muted); }
+  .list .amt { font-weight: 800; font-size: 16px; }
+  .del { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--faint); }
+  .del svg { width: 18px; height: 18px; }
+  .empty { text-align: center; padding: 26px 10px; color: var(--muted); font-size: 14px; }
+
+  /* ---------- plan ---------- */
+  .ladder { list-style: none; margin: 0; padding: 0; position: relative; }
+  .ladder li { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .ladder li:last-child { border-bottom: 0; }
+  .ladder .pct { width: 54px; height: 54px; border-radius: 16px; background: var(--line); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; letter-spacing: -0.02em; }
+  .ladder li.now .pct { background: var(--red); color: #fff; box-shadow: 0 6px 16px rgba(215,57,43,.3); }
+  .ladder li.done .pct { background: var(--ink); color: #fff; }
+  .ladder .info b { display: block; font-size: 15px; } .ladder .info span { font-size: 12px; color: var(--muted); }
+  .ladder .res { display: flex; gap: 4px; }
+  .tag { font-size: 11px; font-weight: 800; padding: 4px 7px; border-radius: 7px; }
+  .tag.hit { background: var(--green-soft); color: var(--green); } .tag.miss { background: var(--red-soft); color: var(--red); } .tag.now { background: var(--ink); color: #fff; }
+  .kv { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .kv:last-child { border-bottom: 0; } .kv b { font-weight: 800; }
+  .stack { display: grid; gap: 10px; margin-top: 12px; }
+
+  /* ---------- setup ---------- */
+  .setup { padding-top: 10px; }
+  .mondays { display: grid; gap: 8px; margin: 16px 0 18px; }
+  .monday { display: flex; justify-content: space-between; align-items: center; padding: 15px 16px; border-radius: 14px; background: var(--card); border: 2px solid transparent; box-shadow: var(--shadow); font-weight: 700; text-align: left; }
+  .monday span { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .monday.on { border-color: var(--red); }
+  .hname { width: 100%; font: inherit; font-size: 20px; font-weight: 800; padding: 12px 14px; margin: 8px 0 10px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); }
+  .hname:focus { outline: none; border-color: var(--red); }
+  .emojis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .emojis button { font-size: 22px; padding: 7px 0; border-radius: 10px; border: 2px solid transparent; }
+  .emojis button.on { border-color: var(--red); background: var(--red-soft); }
+  .steps { list-style: none; padding: 0; margin: 18px 0 0; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 8px 0; font-size: 15px; line-height: 1.4; }
+  .steps li::before { content: counter(s); width: 26px; height: 26px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+
+  /* ---------- sheet (log purchase) ---------- */
+  .scrim { position: fixed; inset: 0; z-index: 20; background: rgba(26,26,26,.45); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--bg); border-radius: 26px 26px 0 0;
+    transform: translateY(105%); transition: transform .32s cubic-bezier(.2,.8,.2,1); padding: 10px 16px calc(env(safe-area-inset-bottom) + 16px); max-height: 94vh; overflow-y: auto; }
+  .sheet.open { transform: none; }
+  .sheet-in { max-width: 480px; margin: 0 auto; }
+  .grab { width: 40px; height: 5px; border-radius: 99px; background: var(--line); margin: 0 auto 12px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
+  .seg button { padding: 11px; border-radius: 10px; font-weight: 800; font-size: 15px; color: var(--muted); }
+  .seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .amount { font-size: 64px; font-weight: 900; text-align: center; letter-spacing: -0.05em; margin: 14px 0 0; line-height: 1; }
+  .amount small { font-size: 34px; color: var(--muted); vertical-align: 18px; margin-right: 2px; }
+  .preview { text-align: center; min-height: 22px; font-weight: 700; font-size: 14px; color: var(--red); margin: 8px 0 12px; }
+  .preview.ok { color: var(--green); }
+  .quick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .quick button { padding: 12px 0; border-radius: 12px; background: var(--card); border: 1.5px solid var(--line); font-weight: 800; font-size: 16px; }
+  .quick button:active { background: var(--line); }
+  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+  .keypad button { padding: 15px 0; border-radius: 12px; font-size: 24px; font-weight: 600; }
   .keypad button:active { background: var(--line); }
-  .actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
-  .list { list-style: none; padding: 0; margin: 0 0 20px; }
-  .list li { display: flex; justify-content: space-between; padding: 14px 4px; border-bottom: 1px solid var(--line); }
-  .list li.tap { cursor: pointer; }
-  .list li.skip { color: var(--muted); font-style: italic; }
-  .modal-wrap { position: fixed; inset: 0; background: rgba(26,26,26,.5); display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .modal { background: var(--bg); border-radius: 18px; padding: 22px; max-width: 400px; width: 100%; }
-  .modal p { margin: 6px 0; }
+  .keypad svg { width: 24px; height: 24px; vertical-align: middle; }
+  .sheet-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+
+  /* ---------- toast + success + modal ---------- */
+  .success { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .success .box { background: var(--ink); color: #fff; border-radius: 26px; padding: 26px 26px 22px; width: 260px; text-align: center; transform: scale(.8); opacity: 0; transition: all .28s cubic-bezier(.2,.9,.3,1.2); }
+  .success.show .box { transform: scale(1); opacity: 1; }
+  .success .check { width: 64px; height: 64px; border-radius: 50%; background: var(--red); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; }
+  .success .check path { stroke-dasharray: 30; stroke-dashoffset: 30; }
+  .success.show .check path { animation: draw .45s .12s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .success b { display: block; font-size: 20px; letter-spacing: -0.02em; }
+  .success span { font-size: 14px; opacity: .8; }
+  .modal-wrap { position: fixed; inset: 0; z-index: 40; background: rgba(26,26,26,.5); display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
+  .modal { background: var(--bg); border-radius: 24px; padding: 22px; max-width: 440px; width: 100%; margin-bottom: env(safe-area-inset-bottom); animation: up .3s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal h3 { font-size: 22px; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px; }
+  .modal .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
   .hidden { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
+<header><div class="hbar"><div class="brand">No Excuses<i>.</i></div><button id="savedPill" class="saved hidden"></button></div></header>
 <main id="app"></main>
-<div id="modal" class="modal-wrap hidden"><div class="modal" id="modal-body"></div></div>
+<nav class="tabs hidden" id="tabs"><div class="tabrow">
+  <button class="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+  <button class="tab" data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>History</button>
+  <button class="tab" data-tab="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V6M16 20v-8M22 20H2"/></svg>Plan</button>
+</div></nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Log a purchase"><div class="sheet-in" id="sheetBody"></div></div>
+<div class="success" id="success"><div class="box"><div class="check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><b id="sTitle"></b><span id="sSub"></span></div></div>
+<div id="modal" class="modal-wrap hidden"><div class="modal" id="modalBody"></div></div>
+<input type="file" id="restoreFile" accept="application/json,.json" class="hidden">
 
 <script src="logic.js"></script>
 <script>
 (function () {
+  'use strict';
   var NE = window.NoExcuses;
   var KEY = 'noexcuses-v1';
-  var app = document.getElementById('app');
-  var LABEL = { pizza: 'Pizza', cash: 'Cash' };
-  var UNIT = { pizza: ['pizza trip', 'pizza trips'], cash: ['cash purchase', 'cash purchases'] };
+  var $ = function (id) { return document.getElementById(id); };
+  var app = $('app');
+  // The two habits are named by the user at setup. Slots are 'a' and 'b'.
+  var EMOJIS = ['🍕', '☕', '🍔', '🥤', '🍩', '🌮', '🛍️', '💵', '🎮', '🍺', '🚕', '📦'];
+  function L(c) { return esc(state && state.habits && state.habits[c] ? state.habits[c].name : (c === 'a' ? 'Habit 1' : 'Habit 2')); }
+  function E(c) { return state && state.habits && state.habits[c] ? state.habits[c].emoji : '•'; }
+  var ICON = {
+    left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+    right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12H9M13 6l-6 6 6 6"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>'
+  };
 
-  // ---- storage (phone browser only) ----
+  // ================= storage =================
+  var storageOK = true;
   function load() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; }
+    try { return NE.migrate(JSON.parse(localStorage.getItem(KEY))) || null; } catch (e) { storageOK = false; return null; }
   }
-  function save(s) {
-    try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { alert('Could not save. Is private browsing on?'); }
+  function save() {
+    state.savedAt = Date.now();
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      // Read it back: proof it actually landed.
+      storageOK = JSON.parse(localStorage.getItem(KEY)).savedAt === state.savedAt;
+    } catch (e) { storageOK = false; }
+    askPersist();
+    renderSaved();
+  }
+  var persisted = null;
+  function askPersist() {
+    if (persisted !== null || !navigator.storage || !navigator.storage.persist) return;
+    navigator.storage.persisted().then(function (p) {
+      if (p) { persisted = true; return; }
+      return navigator.storage.persist().then(function (g) { persisted = !!g; });
+    }).catch(function () { persisted = false; });
   }
   var state = load();
 
-  // ---- helpers ----
-  function money(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, ''); }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function day(ts) { return new Date(ts).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
-  function dayTime(ts) { return new Date(ts).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }); }
-  function trips(cat, n) { return n + ' ' + UNIT[cat][n === 1 ? 0 : 1] + ' left'; }
-
-  function showModal(html) {
-    document.getElementById('modal-body').innerHTML = html;
-    document.getElementById('modal').classList.remove('hidden');
+  // ================= helpers =================
+  function money(n) { var v = Math.round(n * 100) / 100; return (v < 0 ? '-$' : '$') + Math.abs(v).toFixed(2).replace(/\.00$/, ''); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function md(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+  function wd(ts) { return new Date(ts).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
+  function tm(ts) { return new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
+  function trips(cat, n) { return n + ' ' + L(cat).toLowerCase() + ' buy' + (n === 1 ? '' : 's'); }
+  function until(ts) {
+    var ms = Math.max(0, ts - Date.now()), d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+    return d > 0 ? d + 'd ' + h + 'h' : h > 0 ? h + 'h ' + m + 'm' : m + 'm';
   }
-  function hideModal() { document.getElementById('modal').classList.add('hidden'); }
+  function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms || 12); } catch (e) {} }
 
-  // ---- screens ----
-  var screen = 'home', logCat = null, amountStr = '';
+  // ================= nav =================
+  var tab = 'home', histK = null, lastRing = {};
+  function go(t) { tab = t; if (t === 'history') histK = null; render(); window.scrollTo(0, 0); }
+  document.querySelectorAll('[data-tab]').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-tab')); }; });
 
   function render() {
-    if (!state) return renderSetup();
-    if (screen === 'log') return renderLog();
-    if (screen === 'history') return renderHistory();
-    renderHome();
+    if (!state) { $('tabs').classList.add('hidden'); $('savedPill').classList.add('hidden'); return renderSetup(); }
+    $('tabs').classList.remove('hidden');
+    document.querySelectorAll('[data-tab]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === tab); });
+    renderSaved();
+    if (tab === 'history') renderHistory(); else if (tab === 'plan') renderPlan(); else renderHome();
   }
 
-  // 1. Setup (first open only)
-  function renderSetup() {
-    var opts = NE.mondayOptions(Date.now()).map(function (ts) {
-      return '<option value="' + ts + '">Monday, ' + day(ts).replace(/^\w+,?\s*/, '') + ' · 8:00 AM</option>';
+  function renderSaved() {
+    var p = $('savedPill');
+    if (!state) return;
+    p.classList.remove('hidden');
+    if (!storageOK) { p.className = 'saved warn'; p.innerHTML = ICON.warn + 'Not saving'; }
+    else { p.className = 'saved'; p.innerHTML = ICON.check + (state.savedAt ? 'Saved ' + tm(state.savedAt) : 'Saved'); }
+    p.onclick = function () { go('plan'); setTimeout(function () { var el = $('dataCard'); el && el.scrollIntoView({ behavior: 'smooth' }); }, 60); };
+  }
+
+  // ================= SETUP =================
+  var pickTs = null, setupStep = 1, draft = { a: { name: '', emoji: '🍕' }, b: { name: '', emoji: '☕' } };
+
+  // Habit name + emoji fields, used in Setup and in Plan > Edit habits.
+  function habitFields(d) {
+    return NE.CATS.map(function (c, i) {
+      return '<div class="card" style="padding:14px"><div class="label" style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">Habit ' + (i + 1) + '</div>' +
+        '<input class="hname" data-hn="' + c + '" maxlength="16" placeholder="' + (i === 0 ? 'e.g. Pizza' : 'e.g. Coffee') + '" value="' + esc(d[c].name) + '">' +
+        '<div class="emojis">' + EMOJIS.map(function (em) { return '<button type="button" data-he="' + c + '" data-em="' + em + '" class="' + (d[c].emoji === em ? 'on' : '') + '">' + em + '</button>'; }).join('') + '</div></div>';
     }).join('');
-    app.innerHTML =
-      '<div class="brand">No Excuses</div>' +
-      '<h1>When does block 1 start?</h1>' +
-      '<p class="muted">Block 1 is four weeks of logging only, with no limits. It sets your starting number. Weeks run Monday 8 AM to Monday 8 AM.</p>' +
-      '<select id="start">' + opts + '</select>' +
-      '<button class="btn btn-red" id="go">Start</button>';
-    document.getElementById('go').onclick = function () {
-      state = { startTs: Number(document.getElementById('start').value), purchases: [], skips: [], seenReport: 1 };
-      save(state); screen = 'home'; render();
+  }
+  function wireHabitFields(root, d, onChange) {
+    root.querySelectorAll('[data-hn]').forEach(function (inp) {
+      inp.oninput = function () { d[inp.getAttribute('data-hn')].name = inp.value; onChange && onChange(); };
+    });
+    root.querySelectorAll('[data-he]').forEach(function (b) {
+      b.onclick = function () {
+        var c = b.getAttribute('data-he'); d[c].emoji = b.getAttribute('data-em'); buzz();
+        root.querySelectorAll('[data-he="' + c + '"]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      };
+    });
+  }
+  function habitsValid(d) { return NE.CATS.every(function (c) { return d[c].name.trim().length > 0; }); }
+  function cleanHabits(d) { var o = {}; NE.CATS.forEach(function (c) { o[c] = { name: d[c].name.trim().slice(0, 16), emoji: d[c].emoji }; }); return o; }
+
+  function renderSetup() {
+    if (setupStep === 1) {
+      app.innerHTML = '<div class="view setup">' +
+        '<h1>Pick the two habits<br>you want to cut.</h1>' +
+        '<p class="muted">The small buys that add up without you noticing. Food runs, coffee, delivery, whatever yours are.</p>' +
+        habitFields(draft) +
+        '<button class="btn btn-red" id="next1" style="margin-top:6px"' + (habitsValid(draft) ? '' : ' disabled') + '>Next</button></div>';
+      wireHabitFields(app, draft, function () { $('next1').disabled = !habitsValid(draft); });
+      $('next1').onclick = function () { if (habitsValid(draft)) { setupStep = 2; buzz(); renderSetup(); window.scrollTo(0, 0); } };
+      return;
+    }
+    var opts = NE.mondayOptions(Date.now());
+    if (pickTs === null) pickTs = opts[1];
+    app.innerHTML = '<div class="view setup">' +
+      '<button class="textbtn" id="back1" style="padding:0">‹ Back</button>' +
+      '<h1>Half the spending.<br>Starting Monday.</h1>' +
+      '<p class="muted">Pick the Monday your first block starts. Weeks run Monday 8 AM to Monday 8 AM.</p>' +
+      '<ol class="steps">' +
+        '<li><span><b>Weeks 1–4: just log.</b> Every single buy. No limits yet. This finds your real number.</span></li>' +
+        '<li><span><b>Then the limit kicks in at 90%</b> of that number, and drops 10 points every 4 weeks until you hit 50%.</span></li>' +
+        '<li><span><b>Hit or miss, it keeps dropping.</b> One skip per block for breaks like Thanksgiving.</span></li>' +
+      '</ol>' +
+      '<div class="mondays">' + opts.slice(0, 5).map(function (ts, i) {
+        return '<button class="monday' + (ts === pickTs ? ' on' : '') + '" data-ts="' + ts + '">Monday, ' + md(ts) +
+          '<span>' + (i === 0 ? 'This week (already started)' : i === 1 ? 'Next Monday · 8 AM' : 'in ' + i + ' weeks') + '</span></button>';
+      }).join('') + '</div>' +
+      '<button class="btn btn-red" id="go">Start the plan</button>' +
+      '<p class="small muted" style="text-align:center">Everything stays on this phone. No account, no sign-up.</p>' +
+    '</div>';
+    app.querySelectorAll('[data-ts]').forEach(function (b) { b.onclick = function () { pickTs = Number(b.getAttribute('data-ts')); buzz(); renderSetup(); }; });
+    $('back1').onclick = function () { setupStep = 1; renderSetup(); };
+    $('go').onclick = function () {
+      state = { startTs: pickTs, habits: cleanHabits(draft), purchases: [], skips: [], seenReport: 1 };
+      save(); tab = 'home'; buzz(20); render();
     };
   }
 
-  // 2. Home
-  function renderHome() {
-    var now = Date.now();
-    var r = NE.compute(state, now);
+  // ================= HOME =================
+  function ring(id, frac, ink, centerBig, centerSmall) {
+    var r = 48, c = 2 * Math.PI * r, f = Math.max(0, Math.min(1, frac));
+    var from = lastRing[id] === undefined ? 1 : lastRing[id];
+    lastRing[id] = 1 - f;
+    return '<div class="ring"><svg viewBox="0 0 112 112"><circle class="track" cx="56" cy="56" r="' + r + '" fill="none" stroke-width="11"/>' +
+      '<circle class="fill' + (ink ? ' ink' : '') + '" data-ring="' + id + '" data-to="' + (c * (1 - f)) + '" cx="56" cy="56" r="' + r + '" fill="none" stroke-width="11" stroke-dasharray="' + c + '" stroke-dashoffset="' + (c * from) + '"/></svg>' +
+      '<div class="mid"><b class="num">' + centerBig + '</b><span>' + centerSmall + '</span></div></div>';
+  }
+  function animateRings() {
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      app.querySelectorAll('[data-ring]').forEach(function (el) { el.setAttribute('stroke-dashoffset', el.getAttribute('data-to')); });
+      app.querySelectorAll('[data-w]').forEach(function (el) { el.style.width = el.getAttribute('data-w'); });
+    }); });
+  }
 
+  function renderHome() {
+    var now = Date.now(), r = NE.compute(state, now);
     if (!r.started) {
-      app.innerHTML =
-        '<div class="brand">No Excuses</div>' +
-        '<h1>Starts ' + day(state.startTs) + ', 8 AM</h1>' +
-        '<p class="muted">Tracking begins then. Come back and log every pizza run and cash purchase.</p>';
+      app.innerHTML = '<div class="view"><h1>Starts ' + wd(state.startTs) + '</h1>' +
+        '<p class="muted">At 8 AM. Then every buy gets logged. Four weeks of honest numbers.</p>' +
+        '<div class="chips"><div class="chip"><div class="k">Starts in</div><div class="v num">' + until(state.startTs) + '</div></div>' +
+        '<div class="chip"><div class="k">First limit</div><div class="v">Week 5</div><div class="s">at 90% of your number</div></div></div></div>';
       return;
     }
+    var st = NE.stats(state, now);
+    var weekFrac = (now - r.weekStart) / (r.weekEnd - r.weekStart);
+    var measuring = r.pct === null;
 
-    var top = 'Block ' + r.block + ' · ' +
-      (r.skipped ? 'Skipped week' : 'Week ' + r.week.weekInBlock + ' of 4') +
-      (r.pct === null ? ' · Measuring, no limits yet' : ' · Limit ' + r.pct + '%');
+    var head = '<div class="status"><div class="lvl">Block ' + r.block + (r.skipped ? ' · skipped week' : ' · week ' + r.week.weekInBlock + ' of 4') +
+      '<b>' + (measuring ? 'Measuring' : r.pct + '% limit') + '</b></div>' +
+      '<span class="pill num">Resets in ' + until(r.weekEnd) + '</span></div>' +
+      '<div class="weekbar"><span data-w="' + Math.round(weekFrac * 100) + '%" style="width:0"></span></div>';
 
-    var body;
+    var cards;
     if (r.skipped) {
-      body = '<div class="card"><div class="big ink">Skipped week</div><div class="sub muted">Back ' + day(r.weekEnd) + ', 8 AM</div></div>';
+      cards = '<div class="card" style="text-align:center;padding:30px 18px"><div style="font-size:40px">🏖️</div>' +
+        '<h1 style="margin:6px 0">Skipped week</h1><p class="muted" style="margin:0">Nothing counts until ' + wd(r.weekEnd) + ', 8 AM.</p></div>';
     } else {
-      body = NE.CATS.map(function (c) {
+      cards = NE.CATS.map(function (c) {
         var i = r.cats[c];
-        if (r.pct === null) {
-          return '<div class="card"><div class="label">' + LABEL[c] + '</div>' +
-            '<div class="big ink">' + money(i.spentWeek) + '</div>' +
-            '<div class="sub">spent this week</div>' +
-            '<div class="sub muted small">' + money(i.spentBlock) + ' spent this block</div></div>';
+        if (measuring) {
+          return '<div class="card cat">' + ring(c, weekFrac, true, money(i.spentWeek), 'this week') +
+            '<div><div class="label">' + E(c) + ' ' + L(c) + '</div><div class="head">' + money(i.spentBlock) + ' this block</div>' +
+            '<div class="sub">Just log it. Your limit is set from these four weeks.</div></div></div>';
         }
-        var over = i.over > 0;
-        var big = i.tripsLeft === null ? money(Math.max(0, i.left)) + ' left' : trips(c, i.tripsLeft);
-        return '<div class="card' + (over ? ' over' : '') + '"><div class="label">' + LABEL[c] + '</div>' +
-          '<div class="big">' + big + '</div>' +
-          '<div class="sub">' + (over ? 'Over by ' + money(i.over) : money(i.left) + ' of ' + money(i.limit) + ' left') + '</div></div>';
+        var over = i.over > 0, used = i.limit > 0 ? i.spentWeek / i.limit : (i.spentWeek > 0 ? 1 : 0);
+        var big = i.tripsLeft === null ? money(Math.max(0, i.left)) : String(i.tripsLeft);
+        var small = i.tripsLeft === null ? 'left' : 'buy' + (i.tripsLeft === 1 ? '' : 's') + ' left';
+        var headTxt = over ? 'Over by ' + money(i.over) : i.tripsLeft === 0 ? 'Done for the week' : i.tripsLeft === 1 ? 'Last one this week' : trips(c, i.tripsLeft) + ' left';
+        return '<div class="card cat' + (over ? ' over' : '') + '">' + ring(c, used, false, big, small) +
+          '<div><div class="label">' + E(c) + ' ' + L(c) + '</div><div class="head' + (over || i.tripsLeft === 0 ? ' red' : '') + '">' + headTxt + '</div>' +
+          '<div class="sub"><b class="num">' + money(Math.max(0, i.left)) + '</b> of ' + money(i.limit) + ' left</div></div></div>';
       }).join('');
     }
 
-    var buttons = r.skipped ? '' :
-      '<div class="row"><button class="btn btn-red" data-log="pizza">+ Pizza</button>' +
-      '<button class="btn btn-red" data-log="cash">+ Cash</button></div>';
+    var chips = measuring ? '' :
+      '<div class="chips"><div class="chip"><div class="k">🔥 Streak</div><div class="v num">' + st.streak + ' wk' + (st.streak === 1 ? '' : 's') + '</div><div class="s">under the limit · best ' + st.best + '</div></div>' +
+      '<div class="chip"><div class="k">💰 Money kept</div><div class="v num ' + (st.kept >= 0 ? 'good' : 'bad') + '">' + money(st.kept) + '</div><div class="s">vs. your old pace</div></div></div>';
 
-    var skipBit = '';
-    if (r.skipped) skipBit = '<button class="link" id="undo">Undo skip</button>';
-    else if (r.canSkip) skipBit = '<span><button class="link" id="skip">Skip this week</button><br><span class="small muted">1 skip left this block</span></span>';
-    else if (r.skipUsedThisBlock) skipBit = '<span class="small muted">Skip used this block</span>';
+    var buttons = r.skipped ? '' : '<div class="logrow">' + NE.CATS.map(function (c) { return '<button class="btn btn-red" data-log="' + c + '">' + ICON.plus + L(c) + '</button>'; }).join('') + '</div>';
 
-    app.innerHTML =
-      '<div class="brand">No Excuses</div>' +
-      '<p class="topline">' + top + '</p>' + body + buttons +
-      '<div class="links"><button class="link" id="hist">History</button>' + skipBit + '</div>';
+    var skip = '';
+    if (r.skipped) skip = '<div class="skiprow"><button class="textbtn" id="undo">Undo skip</button></div>';
+    else if (r.canSkip) skip = '<div class="skiprow">Break week? <button class="textbtn" id="skip">Skip this week</button> · 1 skip left this block</div>';
+    else skip = '<div class="skiprow">' + (r.skipUsedThisBlock ? 'Skip used this block' : 'Skip only works before your first log of the week') + '</div>';
 
-    app.querySelectorAll('[data-log]').forEach(function (b) {
-      b.onclick = function () { logCat = b.getAttribute('data-log'); amountStr = ''; screen = 'log'; render(); };
-    });
-    document.getElementById('hist').onclick = function () { screen = 'history'; render(); };
-    var sk = document.getElementById('skip');
-    if (sk) sk.onclick = function () {
-      showModal('<h2>Skip this week?</h2><p>Nothing is tracked until Monday 8 AM, and this week won\'t count toward your block.</p>' +
-        '<div class="actions" style="margin-top:16px"><button class="btn btn-ghost" id="m-no">Cancel</button><button class="btn btn-red" id="m-yes">Skip</button></div>');
-      document.getElementById('m-no').onclick = hideModal;
-      document.getElementById('m-yes').onclick = function () { state.skips.push(r.weekStart); save(state); hideModal(); render(); };
+    app.innerHTML = '<div class="view">' + head + cards + chips + buttons + skip + '</div>';
+    animateRings();
+
+    app.querySelectorAll('[data-log]').forEach(function (b) { b.onclick = function () { buzz(); openSheet(b.getAttribute('data-log')); }; });
+    if ($('skip')) $('skip').onclick = function () {
+      modal('<h3>Skip this week?</h3><p class="muted">Nothing gets tracked until Monday 8 AM, and this week won\'t count toward your block. You get one per block.</p>',
+        'Skip it', function () { state.skips.push(r.weekStart); save(); render(); });
     };
-    var un = document.getElementById('undo');
-    if (un) un.onclick = function () {
-      state.skips = state.skips.filter(function (t) { return t !== r.weekStart; }); save(state); render();
-    };
+    if ($('undo')) $('undo').onclick = function () { state.skips = state.skips.filter(function (t) { return t !== r.weekStart; }); save(); render(); };
 
-    // Block-end message, shown once per block.
     if (r.report && (state.seenReport || 1) < r.block) showReport(r);
   }
 
   function showReport(r) {
-    var rep = r.report, lines;
+    var rep = r.report, body;
     if (rep.block === 1) {
-      lines = '<p><b>Block 1 done.</b> Your starting numbers:</p>' +
-        NE.CATS.map(function (c) { return '<p>' + LABEL[c] + ': ' + money(rep.cats[c].total) + '</p>'; }).join('');
+      body = '<p class="muted">These are your starting numbers. Everything is measured against them.</p>' +
+        NE.CATS.map(function (c) { return '<div class="kv"><span>' + E(c) + ' ' + L(c) + '</span><b class="num">' + money(rep.cats[c].total) + '</b></div>'; }).join('');
     } else {
-      lines = NE.CATS.map(function (c) {
+      body = NE.CATS.map(function (c) {
         var x = rep.cats[c];
-        return '<p>' + LABEL[c] + ': ' + (x.hit ? 'hit it.' : 'missed by ' + money(x.missedBy) + '.') + '</p>';
+        return '<div class="kv"><span>' + E(c) + ' ' + L(c) + '</span>' + (x.hit ? '<span class="tag hit">HIT IT</span>' : '<span class="tag miss">MISSED BY ' + money(x.missedBy) + '</span>') + '</div>';
       }).join('');
-      if (rep.finalCheck) lines = '<p><b>' + (NE.CATS.every(function (c) { return rep.cats[c].hit; }) ? 'Goal check: at or under 50%.' : 'Goal check: not at 50% yet.') + '</b></p>' + lines;
+      if (rep.finalCheck) body = '<p><b>' + (NE.CATS.every(function (c) { return rep.cats[c].hit; }) ? 'You\'re at half. That\'s the goal.' : 'Not at half yet. Keep going.') + '</b></p>' + body;
     }
-    showModal('<h2>Block ' + rep.block + ' is over</h2>' + lines +
-      '<p><b>New limit: ' + rep.newPct + '%.</b></p>' +
-      '<button class="btn btn-red" id="m-ok" style="margin-top:16px">OK</button>');
-    document.getElementById('m-ok').onclick = function () { state.seenReport = r.block; save(state); hideModal(); };
+    modal('<h3>Block ' + rep.block + ' is done</h3>' + body + '<p style="margin-bottom:0"><b>New limit: ' + rep.newPct + '%.</b> No excuses.</p>', null, null, 'Let\'s go',
+      function () { state.seenReport = r.block; save(); });
   }
 
-  // 3. Log Purchase
-  function renderLog() {
-    var r = NE.compute(state, Date.now());
-    var amt = parseFloat(amountStr) || 0;
-    var preview = '';
-    if (r.started && r.pct !== null && amt > 0) {
-      var i = r.cats[logCat];
-      var left = i.left - amt;
-      var n = i.avg > 0 ? NE.tripsLeft(left, i.avg) : NE.tripsLeft(left, amt);
-      preview = left < 0 ? 'After this: over by ' + money(-left) + ' this week' : 'After this: ' + trips(logCat, n) + ' this week';
-    }
-    var keys = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
-    app.innerHTML =
-      '<div class="brand">No Excuses</div>' +
-      '<h1>' + LABEL[logCat] + '</h1>' +
-      '<div class="amount">$' + esc(amountStr || '0') + '</div>' +
-      '<div class="preview">' + esc(preview) + '</div>' +
-      '<div class="keypad">' + keys.map(function (k) { return '<button data-k="' + k + '">' + k + '</button>'; }).join('') + '</div>' +
-      '<div class="actions"><button class="btn btn-ghost" id="cancel">Cancel</button>' +
-      '<button class="btn btn-red" id="save"' + (amt > 0 ? '' : ' disabled') + '>Save</button></div>';
+  // ================= LOG SHEET =================
+  var sheetCat = 'a', amountStr = '';
+  function openSheet(cat) {
+    sheetCat = cat; amountStr = '';
+    renderSheet();
+    $('scrim').classList.add('open'); $('sheet').classList.add('open');
+  }
+  function closeSheet() { $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); }
+  $('scrim').onclick = closeSheet;
 
-    app.querySelectorAll('[data-k]').forEach(function (b) {
+  function renderSheet() {
+    var r = NE.compute(state, Date.now());
+    var amt = parseFloat(amountStr) || 0, preview = '', ok = false;
+    if (r.started && !r.skipped && amt > 0) {
+      if (r.pct === null) { preview = 'Logged for your starting number'; ok = true; }
+      else {
+        var i = r.cats[sheetCat], left = i.left - amt, n = NE.tripsLeft(left, i.avg > 0 ? i.avg : amt);
+        if (left < 0) preview = 'This puts you over by ' + money(-left);
+        else { preview = 'After this: ' + trips(sheetCat, n) + ' left this week'; ok = n > 0; }
+      }
+    }
+    var keys = ['1','2','3','4','5','6','7','8','9','.','0','del'];
+    $('sheetBody').innerHTML = '<div class="grab"></div>' +
+      '<div class="seg">' + NE.CATS.map(function (c) { return '<button data-cat="' + c + '" class="' + (c === sheetCat ? 'on' : '') + '">' + E(c) + ' ' + L(c) + '</button>'; }).join('') + '</div>' +
+      '<div class="amount num"><small>$</small>' + esc(amountStr || '0') + '</div>' +
+      '<div class="preview' + (ok ? ' ok' : '') + '">' + esc(preview) + '</div>' +
+      '<div class="quick">' + NE.quickAmounts(state, sheetCat).map(function (q) { return '<button data-q="' + q + '">' + money(q) + '</button>'; }).join('') + '</div>' +
+      '<div class="keypad">' + keys.map(function (k) { return '<button data-k="' + k + '" aria-label="' + (k === 'del' ? 'Delete' : k) + '">' + (k === 'del' ? ICON.back : k) + '</button>'; }).join('') + '</div>' +
+      '<div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Cancel</button><button class="btn btn-red" id="saveBtn"' + (amt > 0 ? '' : ' disabled') + '>Save ' + (amt > 0 ? money(amt) : '') + '</button></div>';
+
+    $('sheetBody').querySelectorAll('[data-cat]').forEach(function (b) { b.onclick = function () { sheetCat = b.getAttribute('data-cat'); buzz(); renderSheet(); }; });
+    $('sheetBody').querySelectorAll('[data-q]').forEach(function (b) { b.onclick = function () { amountStr = b.getAttribute('data-q'); buzz(); renderSheet(); }; });
+    $('sheetBody').querySelectorAll('[data-k]').forEach(function (b) {
       b.onclick = function () {
-        var k = b.getAttribute('data-k');
-        if (k === '⌫') amountStr = amountStr.slice(0, -1);
+        var k = b.getAttribute('data-k'); buzz(6);
+        if (k === 'del') amountStr = amountStr.slice(0, -1);
         else if (k === '.') { if (amountStr.indexOf('.') === -1) amountStr = (amountStr || '0') + '.'; }
         else {
           var dot = amountStr.indexOf('.');
-          if (dot !== -1 && amountStr.length - dot > 2) return;   // max 2 decimals
-          if (amountStr.replace('.', '').length >= 6) return;      // max $9999.99
+          if (dot !== -1 && amountStr.length - dot > 2) return;
+          if (amountStr.replace('.', '').length >= 6) return;
           amountStr = amountStr === '0' ? k : amountStr + k;
         }
-        render();
+        renderSheet();
       };
     });
-    document.getElementById('cancel').onclick = function () { screen = 'home'; render(); };
-    document.getElementById('save').onclick = function () {
+    $('cancel').onclick = closeSheet;
+    $('saveBtn').onclick = function () {
       var a = Math.round((parseFloat(amountStr) || 0) * 100) / 100;
       if (!(a > 0)) return;
-      state.purchases.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), cat: logCat, amount: a, ts: Date.now() });
-      save(state); screen = 'home'; render();
+      state.purchases.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), cat: sheetCat, amount: a, ts: Date.now() });
+      save(); closeSheet(); buzz([15, 40, 15]);
+      var r2 = NE.compute(state, Date.now()), sub;
+      if (r2.pct === null) sub = money(r2.cats[sheetCat].spentWeek) + ' on ' + L(sheetCat).toLowerCase() + ' this week';
+      else { var i2 = r2.cats[sheetCat]; sub = i2.over > 0 ? 'Over by ' + money(i2.over) + ' this week' : trips(sheetCat, i2.tripsLeft || 0) + ' left this week'; }
+      flash('Logged ' + money(a), sub);
+      tab = 'home'; render();
     };
   }
 
-  // 4. History
+  function flash(title, sub) {
+    $('sTitle').textContent = title; $('sSub').textContent = sub;
+    var s = $('success'); s.classList.remove('show'); void s.offsetWidth; s.classList.add('show');
+    clearTimeout(flash.t); flash.t = setTimeout(function () { s.classList.remove('show'); }, 1600);
+  }
+
+  // ================= HISTORY =================
   function renderHistory() {
-    var now = Date.now();
-    var r = NE.compute(state, now);
-    var week = !r.started ? [] : state.purchases.filter(function (p) { return p.ts >= r.weekStart && p.ts < r.weekEnd; })
-      .sort(function (a, b) { return b.ts - a.ts; });
+    var now = Date.now(), cur = NE.weekIndex(state.startTs, now);
+    if (cur < 0) { app.innerHTML = '<div class="view"><h1>History</h1><div class="card empty">Nothing yet. Tracking starts ' + wd(state.startTs) + '.</div></div>'; return; }
+    if (histK === null || histK > cur) histK = cur;
+    var w = NE.weekSummary(state, histK, now);
+    var title = w.isCurrent ? 'This week' : histK === cur - 1 ? 'Last week' : 'Week of ' + md(w.start);
+    var subtitle = md(w.start) + ' – ' + md(w.end - 1) + ' · Block ' + w.block + (w.skipped ? ' · skipped' : ' · week ' + w.weekInBlock);
 
-    var items = week.length ? week.map(function (p) {
-      return '<li class="tap" data-id="' + esc(p.id) + '"><span><b>' + LABEL[p.cat] + '</b> · ' + dayTime(p.ts) + '</span><span>' + money(p.amount) + '</span></li>';
-    }).join('') : '<li class="muted">Nothing logged this week.</li>';
-
-    var totals = !r.started ? '' : NE.CATS.map(function (c) {
-      var i = r.cats[c];
-      return '<li><span>' + LABEL[c] + '</span><span>' + money(i.spentBlock) +
-        (r.pct !== null ? ' of ' + money(i.blockTarget) + ' target' : '') + '</span></li>';
+    var bars = w.skipped ? '<div class="empty">🏖️ Skipped week. It doesn\'t count.</div>' : NE.CATS.map(function (c) {
+      var x = w.cats[c], has = x.limit !== null, frac = has ? (x.limit > 0 ? x.spent / x.limit : (x.spent > 0 ? 1 : 0)) : 0;
+      var verdict = !has ? '' : (x.under ? '<span class="ok">' + (w.isCurrent ? 'On track' : 'Under ✓') + '</span>' : '<span class="no">Over by ' + money(x.spent - x.limit) + '</span>');
+      return '<div class="row"><div class="top"><span>' + E(c) + ' ' + L(c) + ' · <span class="num">' + money(x.spent) + '</span>' + (has ? ' <span class="muted" style="font-weight:600">of ' + money(x.limit) + '</span>' : '') + '</span>' + verdict + '</div>' +
+        (has ? '<div class="bar"><span class="' + (x.under ? '' : 'red') + '" data-w="' + Math.min(100, Math.round(frac * 100)) + '%" style="width:0"></span></div>' : '<div class="small muted">Measuring week, no limit</div>') + '</div>';
     }).join('');
 
-    var skipped = (state.skips || []).slice().sort().map(function (t) {
-      return '<li class="skip"><span>Week of ' + day(t) + '</span><span>Skipped</span></li>';
-    }).join('');
+    var items = w.purchases.length ? '<ul class="list">' + w.purchases.map(function (p) {
+      return '<li><div class="dot ' + p.cat + '">' + E(p.cat) + '</div><div class="what"><b>' + L(p.cat) + '</b><span>' + wd(p.ts) + ' · ' + tm(p.ts) + '</span></div>' +
+        '<div class="amt num">' + money(p.amount) + '</div><button class="del" data-del="' + esc(p.id) + '" aria-label="Delete">' + ICON.trash + '</button></li>';
+    }).join('') + '</ul>' : '<div class="empty">' + (w.skipped ? 'Nothing logged.' : 'Nothing logged this week.') + '</div>';
 
-    app.innerHTML =
-      '<div class="brand">No Excuses</div>' +
-      '<h1>History</h1>' +
-      '<p class="small muted">This week. Tap a purchase to delete it.</p>' +
-      '<ul class="list">' + items + '</ul>' +
-      (r.started ? '<h2>Block ' + r.block + ' totals</h2><ul class="list">' + totals + '</ul>' : '') +
-      (skipped ? '<h2>Skipped weeks</h2><ul class="list">' + skipped + '</ul>' : '') +
-      '<button class="btn btn-ghost" id="back">Back</button>';
+    app.innerHTML = '<div class="view"><h1>History</h1>' +
+      '<div class="weeknav"><button class="navbtn" id="prev" aria-label="Previous week"' + (histK <= 0 ? ' disabled' : '') + '>' + ICON.left + '</button>' +
+      '<div class="t"><b>' + title + '</b><span>' + subtitle + '</span></div>' +
+      '<button class="navbtn" id="next" aria-label="Next week"' + (histK >= cur ? ' disabled' : '') + '>' + ICON.right + '</button></div>' +
+      '<div class="card bars">' + bars + '</div>' +
+      '<h2>Purchases</h2><div class="card" style="padding:4px 16px">' + items + '</div>' +
+      (w.isCurrent ? '' : '<button class="btn btn-ghost" id="today" style="margin-top:14px">Jump to this week</button>') + '</div>';
+    animateRings();
 
-    app.querySelectorAll('[data-id]').forEach(function (li) {
-      li.onclick = function () {
-        if (!confirm('Delete this purchase?')) return;
-        var id = li.getAttribute('data-id');
-        state.purchases = state.purchases.filter(function (p) { return p.id !== id; });
-        save(state); render();
+    $('prev').onclick = function () { if (histK > 0) { histK--; buzz(); renderHistory(); } };
+    $('next').onclick = function () { if (histK < cur) { histK++; buzz(); renderHistory(); } };
+    if ($('today')) $('today').onclick = function () { histK = cur; renderHistory(); };
+    app.querySelectorAll('[data-del]').forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-del'), p = state.purchases.filter(function (x) { return x.id === id; })[0];
+        if (!p) return;
+        modal('<h3>Delete this?</h3><p class="muted">' + L(p.cat) + ' · ' + money(p.amount) + ' · ' + wd(p.ts) + ' ' + tm(p.ts) + '</p>', 'Delete', function () {
+          state.purchases = state.purchases.filter(function (x) { return x.id !== id; }); save(); renderHistory();
+        });
       };
     });
-    document.getElementById('back').onclick = function () { screen = 'home'; render(); };
+  }
+
+  // touch swipe between weeks in History
+  (function () {
+    var x0 = null;
+    app.addEventListener('touchstart', function (e) { x0 = tab === 'history' ? e.touches[0].clientX : null; }, { passive: true });
+    app.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) < 60) return;
+      var b = $(dx > 0 ? 'prev' : 'next'); if (b && !b.disabled) b.click();
+    }, { passive: true });
+  })();
+
+  // ================= PLAN =================
+  function renderPlan() {
+    var now = Date.now(), r = NE.compute(state, now), bl = NE.blocks(state, now), st = r.started ? NE.stats(state, now) : null;
+    var ladder = '';
+    if (r.started) {
+      ladder = '<ul class="ladder">' + bl.rows.map(function (b) {
+        var name = b.pct === null ? 'Measure' : b.pct + '%';
+        var info = b.block === 1 ? 'Log everything, no limit' :
+          (bl.starts.final ? NE.CATS.map(function (c) { return E(c) + ' ' + money(b.cats[c].weeklyLimit) + '/wk'; }).join(' · ') : 'Limits set after block 1');
+        var res = b.status === 'now' ? '<span class="tag now">NOW</span>' :
+          b.status === 'done' && b.pct !== null ? NE.CATS.map(function (c) { return '<span class="tag ' + (b.cats[c].hit ? 'hit' : 'miss') + '">' + E(c) + (b.cats[c].hit ? '✓' : '✗') + '</span>'; }).join('') :
+          b.status === 'done' ? '<span class="tag hit">DONE</span>' : '';
+        return '<li class="' + b.status + '"><div class="pct">' + (b.pct === null ? '100' : b.pct) + '</div><div class="info"><b>Block ' + b.block + ' · ' + name + (b.skipUsed ? ' · skip used' : '') + '</b><span>' + info + '</span></div><div class="res">' + res + '</div></li>';
+      }).join('') + '</ul>';
+    }
+
+    var starts = !r.started ? '' : '<h2>Starting numbers</h2><div class="card">' +
+      NE.CATS.map(function (c) { return '<div class="kv"><span>' + E(c) + ' ' + L(c) + (bl.starts.final ? '' : ' <span class="small muted">(so far)</span>') + '</span><b class="num">' + money(bl.starts[c]) + '</b></div>'; }).join('') +
+      (st && st.weeksJudged ? '<div class="kv"><span>🔥 Best streak</span><b>' + st.best + ' wk' + (st.best === 1 ? '' : 's') + '</b></div><div class="kv"><span>💰 Money kept</span><b class="num">' + money(st.kept) + '</b></div>' : '') + '</div>';
+
+    var habits = '<h2>Your habits</h2><div class="card">' +
+      NE.CATS.map(function (c) { return '<div class="kv"><span>' + E(c) + ' ' + L(c) + '</span></div>'; }).join('') +
+      '<div class="stack"><button class="btn btn-ghost" id="editHabits">Rename habits</button></div></div>';
+    var count = state.purchases.length;
+    var data = '<h2 id="dataCard">Your data</h2><div class="card">' +
+      '<div class="kv"><span>Saved on this phone</span><b style="color:' + (storageOK ? 'var(--green)' : 'var(--red)') + '">' + (storageOK ? '✓ ' + (state.savedAt ? wd(state.savedAt) + ' ' + tm(state.savedAt) : 'Yes') : 'Not saving') + '</b></div>' +
+      '<div class="kv"><span>Purchases stored</span><b class="num">' + count + '</b></div>' +
+      '<div class="kv"><span>Protected from cleanup</span><b>' + (persisted === true ? '✓ Yes' : persisted === false ? 'Not guaranteed' : 'Checking…') + '</b></div>' +
+      '<p class="small muted" style="margin:12px 0 0">Every log saves instantly to this phone\'s browser and is read back to confirm. It survives closing the app and restarting your phone. It does <b>not</b> survive clearing your browser data or switching browsers. That\'s what the backup is for.</p>' +
+      '<div class="stack"><button class="btn btn-ink" id="backup">Download backup</button><button class="btn btn-ghost" id="restore">Restore from backup</button></div>' +
+      (state.backupAt ? '<p class="small muted" style="margin:10px 0 0;text-align:center">Last backup: ' + wd(state.backupAt) + '</p>' : '') + '</div>';
+
+    app.innerHTML = '<div class="view"><h1>The plan</h1><p class="muted" style="margin-top:0">90% → 50%, one block at a time. Hit or miss, it keeps dropping.</p>' +
+      (r.started ? '<div class="card" style="padding:4px 16px">' + ladder + '</div>' : '<div class="card empty">Starts ' + wd(state.startTs) + ', 8 AM.</div>') +
+      starts + habits + data + '</div>';
+
+    $('editHabits').onclick = function () {
+      var d = JSON.parse(JSON.stringify(state.habits));
+      $('modalBody').innerHTML = '<h3>Rename habits</h3><p class="muted" style="margin-top:0">Your history and limits stay the same. Only the names change.</p>' + habitFields(d) +
+        '<div class="actions"><button class="btn btn-ghost" id="hNo">Cancel</button><button class="btn btn-red" id="hYes">Save</button></div>';
+      $('modal').classList.remove('hidden');
+      wireHabitFields($('modalBody'), d, function () { $('hYes').disabled = !habitsValid(d); });
+      $('hNo').onclick = function () { $('modal').classList.add('hidden'); };
+      $('hYes').onclick = function () { if (!habitsValid(d)) return; state.habits = cleanHabits(d); save(); $('modal').classList.add('hidden'); renderPlan(); };
+    };
+    $('backup').onclick = downloadBackup;
+    $('restore').onclick = function () { $('restoreFile').value = ''; $('restoreFile').click(); };
+    if (persisted === null) { askPersist(); setTimeout(function () { if (tab === 'plan') renderPlan(); }, 400); }
+  }
+
+  function downloadBackup() {
+    state.backupAt = Date.now(); save();
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a'), d = new Date();
+    a.href = URL.createObjectURL(blob);
+    a.download = 'no-excuses-backup-' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    flash('Backup saved', 'Keep it in Files or iCloud');
+    renderPlan();
+  }
+  $('restoreFile').onchange = function (e) {
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var obj; try { obj = NE.migrate(JSON.parse(rd.result)); } catch (err) { obj = null; }
+      if (!NE.validBackup(obj)) { modal('<h3>That file won\'t work</h3><p class="muted">It isn\'t a No Excuses backup. Nothing was changed.</p>', null, null, 'OK'); return; }
+      modal('<h3>Restore this backup?</h3><p class="muted">' + obj.purchases.length + ' purchases, plan starting ' + wd(obj.startTs) + '. This replaces what\'s on this phone now (' + state.purchases.length + ' purchases).</p>', 'Restore', function () {
+        state = { startTs: obj.startTs, habits: obj.habits, purchases: obj.purchases, skips: obj.skips || [], seenReport: obj.seenReport || 1, backupAt: obj.backupAt };
+        save(); lastRing = {}; flash('Restored', obj.purchases.length + ' purchases'); go('home');
+      });
+    };
+    rd.readAsText(f);
+  };
+
+  // ================= modal =================
+  function modal(html, yesLabel, onYes, okLabel, onOk) {
+    var actions = yesLabel ? '<div class="actions"><button class="btn btn-ghost" id="mNo">Cancel</button><button class="btn btn-red" id="mYes">' + yesLabel + '</button></div>'
+      : '<div class="actions" style="grid-template-columns:1fr"><button class="btn btn-red" id="mOk">' + (okLabel || 'OK') + '</button></div>';
+    $('modalBody').innerHTML = html + actions;
+    $('modal').classList.remove('hidden');
+    var close = function () { $('modal').classList.add('hidden'); };
+    if ($('mNo')) $('mNo').onclick = close;
+    if ($('mYes')) $('mYes').onclick = function () { close(); buzz(15); onYes && onYes(); };
+    if ($('mOk')) $('mOk').onclick = function () { close(); onOk && onOk(); };
   }
 
   render();
-  // Keep "this week" honest if the app stays open across Monday 8 AM.
-  setInterval(function () { if (screen === 'home' && document.getElementById('modal').classList.contains('hidden')) render(); }, 60000);
+  if (state) askPersist();
+  // Keep the clock honest (week reset, countdowns) while the app is open.
+  setInterval(function () { if (state && tab === 'home' && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open')) render(); }, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && state && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open')) render(); });
 })();
 </script>
 </body>

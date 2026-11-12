@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>No Excuses ad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=block" rel="stylesheet">
+<style>
+  :root { --bg:#FAF7F2; --ink:#1A1A1A; --muted:#6B6560; --line:#E6E0D8; --red:#D7392B; }
+  html, body { margin:0; background:#111; overflow:hidden; }
+  #stage { position:absolute; left:0; top:0; width:1080px; height:1080px; background:var(--bg);
+    overflow:hidden; font-family:Inter, sans-serif; color:var(--ink); transform-origin:0 0;
+    font-feature-settings:"tnum" 1; }
+  .abs { position:absolute; left:0; top:0; }
+
+  /* the one shape that becomes everything */
+  #paper { position:absolute; background:var(--red); }
+  #paper .rl { position:absolute; left:0; right:0; height:64px; display:flex; align-items:center;
+    justify-content:space-between; padding:0 34px; box-sizing:border-box; color:var(--bg);
+    font-size:30px; font-weight:600; letter-spacing:.02em; }
+  #creases { position:absolute; inset:0; width:100%; height:100%; }
+  #win { position:absolute; overflow:hidden; background:#fff; }
+  #reel { position:absolute; left:0; right:0; top:0; }
+  #reel div { height:118px; display:flex; align-items:center; justify-content:center;
+    font-size:72px; font-weight:800; letter-spacing:-.03em; }
+
+  /* phone screens (sizes follow app/index.html) */
+  #views { position:absolute; left:0; top:0; width:396px; height:836px; }
+  .view { position:absolute; inset:0; padding:58px 20px 20px; box-sizing:border-box; }
+  .notch { position:absolute; left:50%; top:16px; width:110px; height:28px; margin-left:-55px;
+    border-radius:14px; background:var(--ink); }
+  .brand { font-weight:800; letter-spacing:-.02em; font-size:20px; }
+  .topline { font-size:15px; font-weight:600; color:var(--muted); margin:6px 0 18px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:12px; }
+  .card .label { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .card .big { font-size:30px; font-weight:800; letter-spacing:-.02em; margin:6px 0 2px; color:var(--red);
+    height:1.2em; line-height:1.2em; overflow:hidden; white-space:nowrap; }
+  .card .sub { font-size:16px; height:1.4em; line-height:1.4em; overflow:hidden; }
+  .roll { will-change:transform; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:18px 0 10px; }
+  .btn { padding:16px; border-radius:14px; font-size:18px; font-weight:800; text-align:center; }
+  .btn-red { background:var(--red); color:#fff; }
+  .btn-ghost { border:2px solid var(--ink); }
+  .links { display:flex; justify-content:space-between; font-size:15px; text-decoration:underline; padding-top:6px; }
+  h1.cat { font-size:30px; font-weight:800; margin:8px 0 0; letter-spacing:-.02em; }
+  .amount { font-size:60px; font-weight:800; text-align:center; margin:16px 0 4px; letter-spacing:-.03em; }
+  .preview { text-align:center; height:22px; font-size:15px; font-weight:600; color:var(--red); margin-bottom:16px; }
+  .keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+  .key { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 0; font-size:24px; font-weight:600; text-align:center; }
+  .actions { display:grid; grid-template-columns:1fr 2fr; gap:10px; }
+
+  #head { position:absolute; left:30px; top:240px; width:552px; height:576px; overflow:visible; }
+  #cursor { position:absolute; left:0; top:0; width:46px; height:56px; transform-origin:0 0; }
+
+  /* headline text: each word rises out of its own mask */
+  .tx { position:absolute; font-weight:800; letter-spacing:-.035em; line-height:1.04; }
+  .tx .ln { display:table; white-space:nowrap; }
+  .tx.center .ln { margin:0 auto; }
+  .w { display:inline-block; overflow:hidden; vertical-align:top; padding:0 .05em .14em; margin:0 -.05em -.14em; }
+  .w + .w { margin-left:.2em; }
+  .wi { display:inline-block; will-change:transform; }
+  .red { color:var(--red); }
+
+  #pct { position:absolute; width:300px; height:110px; overflow:hidden; text-align:right; }
+  #pct div { height:110px; line-height:110px; font-size:96px; font-weight:800; letter-spacing:-.04em; }
+  #wl { position:absolute; left:120px; top:756px; height:34px; overflow:hidden; }
+  #wl span { display:block; font-size:24px; font-weight:800; letter-spacing:.1em; color:var(--muted); }
+  #tag { position:absolute; top:756px; padding:8px 18px; border-radius:999px; background:var(--ink); color:var(--bg);
+    font-size:26px; font-weight:800; transform-origin:100% 0; white-space:nowrap; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="head" viewBox="0 0 460 480" fill="none">
+    <path id="headPath" pathLength="1" stroke="#1A1A1A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"
+      vector-effect="non-scaling-stroke"
+      d="M150 470 L150 400 C95 375 55 320 52 245 C48 135 125 50 230 48 C320 46 385 110 392 195 C394 222 400 240 414 262 C420 272 414 280 402 282 L404 312 C405 324 396 330 388 332 C394 342 392 354 384 360 C378 388 356 398 326 394 L306 392 L306 470"/>
+  </svg>
+
+  <div id="paper">
+    <div id="lines"></div>
+    <svg id="creases" viewBox="0 0 150 150" preserveAspectRatio="none">
+      <g stroke="#FAF7F2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".55">
+        <polyline points="30,40 62,58 55,92 88,110"/>
+        <polyline points="100,28 84,60 116,78"/>
+        <polyline points="40,112 66,96"/>
+        <polyline points="112,104 126,86"/>
+      </g>
+    </svg>
+    <div id="win">
+      <div id="reel"></div>
+      <div id="views">
+        <div class="view" id="home">
+          <div class="notch"></div>
+          <div class="brand">No Excuses</div>
+          <div class="topline">Block 3 · Week 2 of 4 · Limit 80%</div>
+          <div class="card" id="cardPizza">
+            <div class="label">Pizza</div>
+            <div class="big" id="bigPizza"><div class="roll" id="rollPizza"><div>1 pizza trip left</div><div>2 pizza trips left</div></div></div>
+            <div class="sub"><div class="roll" id="rollSub"><div>$19 of $57 left</div><div>$38 of $57 left</div></div></div>
+          </div>
+          <div class="card">
+            <div class="label">Cash</div>
+            <div class="big" id="bigCash">2 cash purchases left</div>
+            <div class="sub">$40 of $60 left</div>
+          </div>
+          <div class="row"><div class="btn btn-red" id="bPizza">+ Pizza</div><div class="btn btn-red">+ Cash</div></div>
+          <div class="links"><span>History</span><span>Skip this week</span></div>
+        </div>
+        <div class="view" id="log">
+          <div class="notch"></div>
+          <div class="brand">No Excuses</div>
+          <h1 class="cat">Pizza</h1>
+          <div class="amount" id="amt">$0</div>
+          <div class="preview" id="prev"></div>
+          <div class="keypad">
+            <div class="key" id="k1">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key" id="k9">9</div>
+            <div class="key">.</div><div class="key">0</div><div class="key">⌫</div>
+          </div>
+          <div class="actions"><div class="btn btn-ghost">Cancel</div><div class="btn btn-red" id="bSave">Save</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pct"><div id="pctRoll"></div></div>
+  <div id="wl"><span>WEEKLY LIMIT</span></div>
+  <div id="tag">Missed?</div>
+
+  <svg id="cursor" viewBox="0 0 46 56">
+    <path d="M3 3 L3 44 L13.5 34 L21 51 L28.5 47.5 L21 31 L36 31 Z" fill="#1A1A1A" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+  </svg>
+</div>
+
+<script>
+(function () {
+  // ---------- math ----------
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const p = (t, a, b) => clamp((t - a) / (b - a));
+  const lerp = (a, b, x) => a + (b - a) * x;
+  const eo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);            // expo out (no overshoot)
+  const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const ei = x => x * x * x;
+  const eq = x => 1 - (1 - x) * (1 - x);
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, x) => { a = hex(a); b = hex(b); return 'rgb(' + a.map((v, i) => Math.round(lerp(v, b[i], x))).join(',') + ')'; };
+  const lr = (A, B, x) => ({ x: lerp(A.x, B.x, x), y: lerp(A.y, B.y, x), w: lerp(A.w, B.w, x), h: lerp(A.h, B.h, x) });
+  const ins = (R, d) => ({ x: R.x + d, y: R.y + d, w: R.w - 2 * d, h: R.h - 2 * d });
+  const $ = id => document.getElementById(id);
+
+  const C = { bg: '#FAF7F2', ink: '#1A1A1A', line: '#E6E0D8', red: '#D7392B', white: '#FFFFFF' };
+  const RED_DARK = '#A92C20';
+
+  // ---------- layout constants (stage px) ----------
+  const PHONE = { x: 90, y: 110, w: 420, h: 860 };
+  const SLOT = { x: 160, y: 421, w: 280, h: 130 };
+  const TRACK = { x: 120, y: 640, w: 840, h: 96 };
+  const ball = (cx, cy, d) => ({ x: cx - d / 2, y: cy - d / 2, w: d, h: d });
+
+  // ---------- scene 1: receipt ----------
+  const ITEMS = [['PIZZA', '$18'], ['PIZZA', '$22'], ['CASH', '$40'], ['PIZZA', '$15'], ['CASH', '$20'], ['PIZZA', '$19'],
+    ['CASH', '$35'], ['PIZZA', '$24'], ['PIZZA', '$17'], ['CASH', '$60'], ['PIZZA', '$21'], ['CASH', '$45'],
+    ['PIZZA', '$16'], ['CASH', '$30'], ['PIZZA', '$23'], ['PIZZA', '$18'], ['CASH', '$25'], ['PIZZA', '$20'],
+    ['CASH', '$50'], ['PIZZA', '$22']];
+  // quarter notes, then eighths, then sixteenths: the printer speeds up on the beat (120 BPM)
+  const PT = [0, .5, 1, 1.5, 2, 2.25, 2.5, 2.75, 3, 3.125, 3.25, 3.375, 3.5, 3.5625, 3.625, 3.6875, 3.75, 3.8125, 3.875, 3.9375];
+  const lineEls = ITEMS.map(([a, b]) => {
+    const d = document.createElement('div'); d.className = 'rl';
+    d.innerHTML = '<span>' + a + '</span><span>' + b + '</span>';
+    $('lines').appendChild(d); return d;
+  });
+  function feed(t) {
+    let y = 40;
+    PT.forEach((s, k) => { const gap = (PT[k + 1] || 4) - s; y += 64 * eo(p(t, s, s + Math.min(.14, gap))); });
+    return y;
+  }
+  const receiptRect = t => { const b = feed(t); return { x: 120, y: -40, w: 360, h: b + 40 }; };
+  function teeth() {
+    const pts = ['0 0', '100% 0', '100% calc(100% - 12px)'];
+    for (let x = 360 - 15, up = false; x > 0; x -= 15, up = !up) pts.push(x + 'px ' + (up ? 'calc(100% - 12px)' : '100%'));
+    pts.push('0 calc(100% - 12px)');
+    return 'polygon(' + pts.join(',') + ')';
+  }
+  const TEETH = teeth();
+
+  // ---------- scene 2: reel ----------
+  const REEL = ['$260?', '$450?', '$600?'];
+  for (let i = 0; i < 40; i++) { const d = document.createElement('div'); d.textContent = REEL[i % 3]; $('reel').appendChild(d); }
+  const SPIN_START = 5.05, SPIN_SPEED = 7, SCRATCH = 9.5;
+  function reelPos(t) {
+    if (t < SCRATCH) return SPIN_SPEED * Math.max(0, t - SPIN_START);
+    const p0 = SPIN_SPEED * (SCRATCH - SPIN_START);
+    return p0 + .35 * eq(p(t, SCRATCH, SCRATCH + .1));   // stops dead between two numbers
+  }
+
+  // ---------- headlines ----------
+  const TX = [
+    { id: 't1', text: 'Where did|*$400 go?', x: 560, w: 470, size: 96, a: .5, b: 3.85, vc: 540 },
+    { id: 't2', text: "You're|guessing.", x: 590, w: 440, size: 104, a: 5.0, b: 7.3, vc: 540 },
+    { id: 't3', text: 'Every|week.', x: 590, w: 440, size: 104, a: 7.5, b: 9.95, vc: 540 },
+    { id: 't4', text: 'Log it|in seconds.', x: 580, w: 450, size: 96, a: 11.0, b: 15.2, vc: 540 },
+    { id: 't5', text: "See what's|left.", x: 580, w: 450, size: 96, a: 15.5, b: 19.85, vc: 540 },
+    { id: 't6', text: 'Every 4 weeks,|it drops.', x: 120, w: 840, size: 96, a: 20.45, b: 22.8, top: 200 },
+    { id: 't7', text: 'Hit or miss.', x: 120, w: 840, size: 96, a: 23.0, b: 25.85, top: 300 },
+    { id: 't8', text: 'Half the spending.', x: 70, w: 940, size: 116, a: 26.15, b: 99, top: 360, center: true },
+    { id: 't9', text: '*No *Excuses', x: 70, w: 940, size: 184, a: 27.8, b: 99, top: 560, center: true, dur: .32, stag: .05 },
+  ];
+  TX.forEach(T => {
+    const el = document.createElement('div'); el.className = 'tx' + (T.center ? ' center' : ''); el.id = T.id;
+    el.style.left = T.x + 'px'; el.style.width = T.w + 'px'; el.style.fontSize = T.size + 'px';
+    el.innerHTML = T.text.split('|').map(line => '<div class="ln">' + line.split(' ').map(w => {
+      const red = w[0] === '*'; if (red) w = w.slice(1);
+      return '<span class="w"><span class="wi' + (red ? ' red' : '') + '">' + w + '</span></span>';
+    }).join('') + '</div>').join('');
+    $('stage').insertBefore(el, $('cursor'));
+    T.el = el; T.ws = [...el.querySelectorAll('.wi')];
+  });
+  function textAt(T, t) {
+    const on = t > T.a - .01 && t < T.b + .6;
+    T.el.style.visibility = on ? 'visible' : 'hidden';
+    if (!on) return;
+    const dur = T.dur || .5, st = T.stag || .06;
+    T.ws.forEach((w, i) => {
+      const inn = eo(p(t, T.a + i * st, T.a + i * st + dur));
+      const out = ei(p(t, T.b + i * .035, T.b + i * .035 + .25));
+      w.style.transform = 'translateY(' + ((1 - inn) * 118 - out * 118).toFixed(2) + '%)';
+    });
+  }
+
+  // ---------- scene 4: limit ----------
+  const STEPS = [21, 22, 23, 24, 25];
+  const FRAC = [1, .9, .8, .7, .6, .5];
+  ['', '90%', '80%', '70%', '60%', '50%', ''].forEach(v => { const d = document.createElement('div'); d.textContent = v; $('pctRoll').appendChild(d); });
+  function stepIdx(t) { let s = 0; STEPS.forEach(st => s += eo(p(t, st, st + .22))); return s; }
+  function fracAt(t) { const s = stepIdx(t); const i = Math.floor(s); return lerp(FRAC[i], FRAC[Math.min(5, i + 1)], s - i); }
+
+  // ---------- cursor ----------
+  let CK = [], PRESS = [];
+  function cursorAt(t) {
+    if (t < CK[0][0] || t > CK[CK.length - 1][0]) return null;
+    for (let i = 0; i < CK.length - 1; i++) {
+      const [ta, xa, ya] = CK[i], [tb, xb, yb] = CK[i + 1];
+      if (t <= tb) { const x = eio(p(t, ta, tb)); return { x: lerp(xa, xb, x), y: lerp(ya, yb, x) }; }
+    }
+  }
+  const pressAmt = (t, at) => { const d = t - at; return d < -.08 || d > .14 ? 0 : d < 0 ? eo(p(d, -.08, 0)) : 1 - p(d, 0, .14); };
+
+  // ---------- the frame function ----------
+  function seek(t) {
+    t = clamp(t, 0, 30);
+    const paper = $('paper'), win = $('win');
+    let R, rad = 0, bg = C.red, W = null, winRad = 14, winBg = C.white, scale = 1, jolt = 0;
+
+    // shake on the record-scratch stop
+    if (t >= SCRATCH && t < SCRATCH + .35) jolt = 9 * Math.sin((t - SCRATCH) * 70) * (1 - p(t, SCRATCH, SCRATCH + .35));
+
+    if (t < 4) {
+      R = receiptRect(t);
+    } else if (t < 4.45) {
+      const x = eio(p(t, 4, 4.45));
+      R = lr(receiptRect(4), ball(300, 150, 150), x); rad = lerp(0, 75, x);
+    } else if (t < 5) {
+      R = ball(300, lerp(150, 486, ei(p(t, 4.45, 4.95))), 150); rad = 75;
+    } else if (t < 10) {
+      const x = eo(p(t, 5, 5.3));
+      R = lr(ball(300, 486, 150), SLOT, x); rad = lerp(75, 20, x);
+      W = ins(R, 6); winRad = 14;
+    } else if (t < 20) {
+      const x = eio(p(t, 10, 10.8));
+      R = lr(SLOT, PHONE, x); rad = lerp(20, 64, x); bg = mix(C.red, C.ink, x);
+      W = ins(R, lerp(6, 12, x)); winRad = lerp(14, 52, x); winBg = mix(C.white, C.bg, x);
+      scale = 1 + .07 * eio(p(t, 16.3, 19.6));
+    } else if (t < 26) {
+      const x = eio(p(t, 20, 20.7));
+      R = lr(PHONE, TRACK, x); rad = lerp(64, 18, x); bg = mix(C.ink, C.line, x);
+      const fill = { x: TRACK.x, y: TRACK.y, w: TRACK.w * fracAt(t), h: TRACK.h };
+      W = lr(ins(PHONE, 12), fill, x); winRad = lerp(52, 18, x); winBg = mix(C.bg, C.red, x);
+      scale = 1 + .07 * (1 - eio(p(t, 20, 20.5)));
+    } else {
+      const x = eio(p(t, 26, 26.6));
+      R = TRACK; rad = 18; bg = mix(C.line, C.bg, x);
+      const fill = { x: TRACK.x, y: TRACK.y, w: TRACK.w * .5, h: TRACK.h };
+      W = lr(fill, UNDER, x); winRad = lerp(18, 6, x); winBg = C.red;
+    }
+
+    // paper
+    Object.assign(paper.style, {
+      left: (R.x + jolt) + 'px', top: R.y + 'px', width: R.w + 'px', height: R.h + 'px',
+      borderRadius: rad + 'px', background: bg, clipPath: t < 4 ? TEETH : 'none',
+      transformOrigin: (300 - R.x) + 'px ' + (300 - R.y) + 'px', transform: 'scale(' + scale + ')'
+    });
+
+    // receipt lines
+    const b = t < 4 ? feed(t) : feed(4);
+    const lineOp = 1 - p(t, 4, 4.12);
+    lineEls.forEach((el, k) => {
+      const show = t >= PT[k] && lineOp > 0;
+      el.style.display = show ? 'flex' : 'none';
+      if (show) { el.style.top = (b + 40 - 72 - 64 * k - 32) + 'px'; el.style.opacity = lineOp; }
+    });
+    $('creases').style.opacity = t < 4 ? 0 : p(t, 4.2, 4.45) * (1 - p(t, 5, 5.12));
+
+    // window (slot -> phone screen -> limit fill -> underline)
+    if (W) {
+      Object.assign(win.style, {
+        display: 'block', left: (W.x - R.x) + 'px', top: (W.y - R.y) + 'px', width: W.w + 'px', height: W.h + 'px',
+        borderRadius: winRad + 'px', background: winBg,
+        clipPath: t < 5.4 ? 'inset(' + (50 * (1 - eo(p(t, 5.05, 5.35)))).toFixed(2) + '% round ' + winRad + 'px)' : 'none'
+      });
+    } else win.style.display = 'none';
+
+    // reel
+    const reelOp = t < 10 ? 1 : 1 - p(t, 10, 10.12);
+    $('reel').style.display = reelOp > 0 && W ? 'block' : 'none';
+    $('reel').style.opacity = reelOp;
+    $('reel').style.transform = 'translateY(' + (-reelPos(t) * 118).toFixed(2) + 'px)';
+
+    // phone screens
+    const vOp = t < 20 ? p(t, 10.5, 10.8) : 1 - p(t, 20, 20.14);
+    const views = $('views');
+    views.style.display = vOp > 0 && t >= 10 ? 'block' : 'none';
+    views.style.opacity = vOp;
+    [...$('home').children].forEach((c, i) => {
+      const k = eo(p(t, 10.5 + i * .05, 10.95 + i * .05));
+      c.style.transform = 'translateY(' + ((1 - k) * 26) + 'px)';
+    });
+    const toLog = eo(p(t, 12.1, 12.5)), toHome = eo(p(t, 14.6, 15.0));
+    const slide = toLog - toHome;              // 0 = home, 1 = log
+    $('home').style.transform = 'translateX(' + (-slide * 100) + '%)';
+    $('log').style.transform = 'translateX(' + ((1 - slide) * 100) + '%)';
+    $('amt').textContent = t < 13 ? '$0' : t < 13.5 ? '$1' : '$19';
+    $('prev').textContent = t < 13.5 ? '' : 'After this: 1 pizza trip left this week';
+    const drop = eo(p(t, 16, 16.3));
+    $('rollPizza').style.transform = 'translateY(' + (-(1 - drop) * 50) + '%)';
+    $('rollSub').style.transform = 'translateY(' + (-(1 - drop) * 50) + '%)';
+
+    // taps
+    PRESS.forEach(([at, el, from, to]) => {
+      const a = pressAmt(t, at); el.style.background = mix(from, to, a);
+      el.style.transform = 'scale(' + (1 - .04 * a) + ')';
+    });
+
+    // head
+    const head = $('head'), hp = $('headPath');
+    const hOn = t >= 4.1 && t < 10.5;
+    head.style.display = hOn ? 'block' : 'none';
+    if (hOn) {
+      hp.style.strokeDasharray = '1 1';
+      hp.style.strokeDashoffset = t < 10 ? (1 - eio(p(t, 4.1, 4.8))) : -eio(p(t, 10, 10.45));
+      head.style.transform = 'translateX(' + jolt + 'px)';
+    }
+
+    // limit labels
+    const pctOn = t >= 20.8 && t < 26.6;
+    const fillEnd = TRACK.x + TRACK.w * fracAt(t);
+    $('pct').style.display = pctOn ? 'block' : 'none';
+    $('pct').style.left = (fillEnd - 300) + 'px';
+    $('pct').style.top = (TRACK.y - 120) + 'px';
+    const pIdx = eo(p(t, 20.8, 21.0)) * 0 + stepIdx(t) + eo(p(t, 26, 26.3));
+    $('pctRoll').style.transform = 'translateY(' + (-pIdx * 110) + 'px)';
+    const wlIn = eo(p(t, 20.6, 21.1)), wlOut = ei(p(t, 26, 26.25));
+    $('wl').style.display = t >= 20.6 && t < 26.3 ? 'block' : 'none';
+    $('wl').firstChild.style.transform = 'translateY(' + ((1 - wlIn) * 110 + wlOut * 110) + '%)';
+    const tg = $('tag');
+    const tagIn = eo(p(t, 23.5, 23.75)), tagOut = ei(p(t, 26, 26.2));
+    const tagS = tagIn * (1 - tagOut);
+    tg.style.display = tagS > 0.001 ? 'block' : 'none';
+    tg.style.left = (fillEnd - TAGW) + 'px';
+    tg.style.opacity = clamp(tagS * 4);
+    tg.style.transform = 'scale(' + lerp(.6, 1, tagS) + ')';
+
+    // headlines
+    TX.forEach(T => textAt(T, t));
+
+    // cursor
+    const cp = CK.length ? cursorAt(t) : null;
+    const cur = $('cursor');
+    cur.style.display = cp ? 'block' : 'none';
+    if (cp) {
+      let pr = 0; PRESS.forEach(([at]) => pr = Math.max(pr, pressAmt(t, at)));
+      cur.style.transform = 'translate(' + cp.x + 'px,' + cp.y + 'px) scale(' + (1 - .14 * pr) + ')';
+    }
+  }
+
+  // ---------- setup after fonts ----------
+  let UNDER = { x: 0, y: 0, w: 10, h: 12 }, TAGW = 140;
+  async function init() {
+    await Promise.all(['800 96px Inter', '600 30px Inter', '400 16px Inter'].map(f => document.fonts.load(f)));
+    await document.fonts.ready;
+    window.__fontsOk = document.fonts.check('800 96px Inter');
+
+    // fit text: shrink until every line fits its column
+    TX.forEach(T => {
+      let s = T.size;
+      const fits = () => [...T.el.querySelectorAll('.ln')].every(l => l.getBoundingClientRect().width <= T.w);
+      while (!fits() && s > 40) { s -= 2; T.el.style.fontSize = s + 'px'; }
+      const h = T.el.getBoundingClientRect().height;
+      T.el.style.top = (T.vc ? T.vc - h / 2 : T.top) + 'px';
+    });
+    // the two card numbers share one size, fit to the card
+    let bs = 30; const cash = $('bigCash');
+    while (cash.scrollWidth > cash.clientWidth && bs > 18) { bs--; cash.style.fontSize = bs + 'px'; }
+    $('bigPizza').style.fontSize = bs + 'px';
+
+    // underline sits under "Half the spending."
+    const ln = $('t8').querySelector('.ln').getBoundingClientRect();
+    UNDER = { x: ln.left, y: ln.bottom + 6, w: ln.width, h: 12 };
+    TAGW = $('tag').getBoundingClientRect().width;
+
+    // cursor targets, measured off the real layout
+    seek(11.5);
+    const SCR = ins(PHONE, 12);
+    const at = (el, view) => {
+      const r = el.getBoundingClientRect(), v = $(view).getBoundingClientRect();
+      return [SCR.x + r.left - v.left + r.width * .5, SCR.y + r.top - v.top + r.height * .55];
+    };
+    const bp = at($('bPizza'), 'home'), k1 = at($('k1'), 'log'), k9 = at($('k9'), 'log'), sv = at($('bSave'), 'log');
+    const card = at($('cardPizza'), 'home');
+    CK = [[11.0, 760, 1120], [11.9, ...bp], [12.15, ...bp], [12.85, ...k1], [13.08, ...k1], [13.38, ...k9], [13.58, ...k9],
+      [14.3, ...sv], [14.62, ...sv], [15.4, card[0] + 120, card[1] + 90], [16.4, card[0] + 120, card[1] + 90], [17.2, 760, 1140]];
+    PRESS = [[12.0, $('bPizza'), C.red, RED_DARK], [13.0, $('k1'), C.white, C.line], [13.5, $('k9'), C.white, C.line],
+      [14.5, $('bSave'), C.red, RED_DARK]];
+    seek(0);
+  }
+
+  window.seek = seek;
+  window.__ready = false;
+  init().then(() => {
+    window.__ready = true;
+    const q = new URLSearchParams(location.search);
+    if (q.has('render')) return;
+    const fit = () => { const s = Math.min(innerWidth, innerHeight) / 1080;
+      $('stage').style.transform = 'translate(' + (innerWidth - 1080 * s) / 2 + 'px,' + (innerHeight - 1080 * s) / 2 + 'px) scale(' + s + ')'; };
+    fit(); addEventListener('resize', fit);
+    if (q.has('t')) return seek(parseFloat(q.get('t')));
+    let t0 = performance.now();
+    addEventListener('click', () => t0 = performance.now());
+    (function loop(now) { seek(((now - t0) / 1000) % 31.5); requestAnimationFrame(loop); })(performance.now());
+  });
+})();
+</script>
+</body>
+</html>

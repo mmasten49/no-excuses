@@ -1,7 +1,7 @@
 // No Excuses: all the math. Pure functions only (no DOM), so it can be tested.
 // Rules come from solution.md, "How the numbers work".
 (function (root) {
-  var CATS = ['pizza', 'cash'];
+  var CATS = ['a', 'b'];
   var DAY = 24 * 60 * 60 * 1000;
 
   // Start of calendar week k (k = 0 is block 1, week 1). Uses setDate so 8:00 AM survives DST.
@@ -144,8 +144,120 @@
     return out;
   }
 
+  // ---------- History, Plan, streak, money kept ----------
+
+  // Starting numbers (block-1 totals). `final` = block 1 is over.
+  function startingNumbers(state, map) {
+    var out = {}, final = map.some(function (m) { return m.block >= 2; });
+    CATS.forEach(function (c) { out[c] = 0; });
+    (state.purchases || []).forEach(function (p) {
+      var k = weekIndex(state.startTs, p.ts);
+      if (k < 0 || k >= map.length) return;
+      var m = map[k];
+      if (!m.skipped && m.block === 1) out[p.cat] += p.amount;
+    });
+    CATS.forEach(function (c) { out[c] = round2(out[c]); });
+    out.final = final;
+    return out;
+  }
+
+  // One calendar week, for the History screen. k can be any week up to the current one.
+  function weekSummary(state, k, now) {
+    var cur = weekIndex(state.startTs, now);
+    var map = weekMap(state, Math.max(cur, k));
+    var m = map[k], starts = startingNumbers(state, map);
+    var pct = m.skipped ? null : blockPct(m.block);
+    var list = (state.purchases || []).filter(function (p) { return weekIndex(state.startTs, p.ts) === k; })
+      .sort(function (a, b) { return b.ts - a.ts; });
+    var cats = {};
+    CATS.forEach(function (c) {
+      var spent = round2(sum(list.filter(function (p) { return p.cat === c; })));
+      var limit = pct === null ? null : round2(starts[c] / 4 * pct / 100);
+      cats[c] = { spent: spent, limit: limit, under: limit === null ? null : spent <= limit + 0.005 };
+    });
+    return {
+      k: k, start: m.start, end: weekStart(state.startTs, k + 1), block: m.block, skipped: m.skipped,
+      weekInBlock: m.weekInBlock, pct: pct, cats: cats, purchases: list, isCurrent: k === cur, isPast: k < cur
+    };
+  }
+
+  // Streak = finished weeks in a row (block 2+) where BOTH categories stayed under the limit. Skipped weeks don't break it.
+  // Money kept = for finished weeks in block 2+, how far under your old pace (starting number / 4) you spent. Can be negative.
+  function stats(state, now) {
+    var cur = weekIndex(state.startTs, now);
+    if (cur < 1) return { streak: 0, best: 0, kept: 0, weeksJudged: 0 };
+    var map = weekMap(state, cur), starts = startingNumbers(state, map);
+    var streak = 0, best = 0, run = 0, kept = 0, judged = 0;
+    for (var k = 0; k < cur; k++) {
+      var m = map[k];
+      if (m.skipped || m.block < 2) continue;
+      var w = weekSummary(state, k, now);
+      var ok = CATS.every(function (c) { return w.cats[c].under; });
+      judged++;
+      run = ok ? run + 1 : 0;
+      if (run > best) best = run;
+      CATS.forEach(function (c) { kept += starts[c] / 4 - w.cats[c].spent; });
+    }
+    streak = run;
+    return { streak: streak, best: best, kept: round2(kept), weeksJudged: judged };
+  }
+
+  // Every block so far, for the Plan screen.
+  function blocks(state, now) {
+    var cur = weekIndex(state.startTs, now);
+    if (cur < 0) return [];
+    var map = weekMap(state, cur), starts = startingNumbers(state, map);
+    var curBlock = map[cur].block, out = [];
+    for (var b = 1; b <= Math.max(6, curBlock); b++) {
+      var pct = blockPct(b), weeks = map.filter(function (m) { return m.block === b; });
+      var row = { block: b, pct: pct, status: b < curBlock ? 'done' : b === curBlock ? 'now' : 'next',
+        skipUsed: weeks.some(function (m) { return m.skipped; }), cats: {} };
+      CATS.forEach(function (c) {
+        var total = 0;
+        (state.purchases || []).forEach(function (p) {
+          var k = weekIndex(state.startTs, p.ts);
+          if (k >= 0 && k <= cur && !map[k].skipped && map[k].block === b && p.cat === c) total += p.amount;
+        });
+        var target = pct === null ? null : round2(starts[c] * pct / 100);
+        row.cats[c] = { total: round2(total), target: target,
+          hit: target === null || row.status !== 'done' ? null : total <= target + 0.005,
+          weeklyLimit: pct === null || !starts.final ? null : round2(starts[c] / 4 * pct / 100) };
+      });
+      out.push(row);
+    }
+    return { rows: out, starts: starts };
+  }
+
+  // Quick-amount buttons: your 3 most-used amounts for this category, filled out with sensible defaults.
+  function quickAmounts(state, cat) {
+    var counts = {};
+    (state.purchases || []).forEach(function (p) { if (p.cat === cat) counts[p.amount] = (counts[p.amount] || 0) + 1; });
+    var mine = Object.keys(counts).map(Number).sort(function (a, b) { return counts[b] - counts[a] || b - a; }).slice(0, 3);
+    var defaults = [10, 20, 30];
+    defaults.forEach(function (d) { if (mine.length < 3 && mine.indexOf(d) === -1) mine.push(d); });
+    return mine.sort(function (a, b) { return a - b; });
+  }
+
+  // Older saves used fixed 'pizza' / 'cash' categories. Move them into the generic slots a / b.
+  function migrate(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    var map = { pizza: 'a', cash: 'b' };
+    if (Array.isArray(obj.purchases)) obj.purchases.forEach(function (p) { if (p && map[p.cat]) p.cat = map[p.cat]; });
+    var h = obj.habits;
+    var ok = h && CATS.every(function (c) { return h[c] && typeof h[c].name === 'string' && h[c].name.trim(); });
+    if (!ok) obj.habits = { a: { name: 'Pizza', emoji: '🍕' }, b: { name: 'Cash', emoji: '💵' } };
+    return obj;
+  }
+
+  // Backup file: validate before restoring so a bad file can't wipe real data.
+  function validBackup(obj) {
+    return !!obj && typeof obj.startTs === 'number' && Array.isArray(obj.purchases) && Array.isArray(obj.skips || []) &&
+      obj.purchases.every(function (p) { return p && CATS.indexOf(p.cat) !== -1 && typeof p.amount === 'number' && p.amount > 0 && typeof p.ts === 'number'; });
+  }
+
   root.NoExcuses = {
     CATS: CATS, weekStart: weekStart, weekIndex: weekIndex, blockPct: blockPct,
-    weekMap: weekMap, compute: compute, tripsLeft: tripsLeft, mondayOptions: mondayOptions
+    weekMap: weekMap, compute: compute, tripsLeft: tripsLeft, mondayOptions: mondayOptions,
+    weekSummary: weekSummary, stats: stats, blocks: blocks, quickAmounts: quickAmounts, validBackup: validBackup, migrate: migrate
   };
 })(typeof window !== 'undefined' ? window : globalThis);

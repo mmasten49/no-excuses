@@ -1,6 +1,6 @@
 # CLAUDE.md: Module 4 app
 
-MGMT 342, Fall 2026. Matthew Masten's Module 4 project: **No Excuses**, a small phone web app that helps a college student track and cut spending on one or two habits, pizza and cash purchases.
+MGMT 342, Fall 2026. Matthew Masten's Module 4 project: **No Excuses**, a small phone web app that helps a college student track and cut spending on two habits they name themselves. Matthew's are pizza and cash purchases, and those are the public example used on the web page and in the ad.
 
 ## The map: which file holds what
 
