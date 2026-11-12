@@ -3,82 +3,450 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>No Excuses</title>
-<meta name="description" content="Log every pizza run and cash purchase in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half.">
+<title>No Excuses: cut your habit spending in half</title>
+<meta name="description" content="Pick the two habits draining your money. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half.">
+<meta name="theme-color" content="#FAF7F2">
+<meta property="og:title" content="No Excuses">
+<meta property="og:description" content="Cut your habit spending in half. No excuses.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #FAF7F2; --ink: #1A1A1A; --muted: #6B6560; --line: #E6E0D8; --red: #D7392B; --red-soft: #FBE9E7; }
+  :root {
+    --bg: #FAF7F2; --bg2: #F3EEE6; --ink: #1A1A1A; --muted: #6B6560; --faint: #A39C94; --line: #E6E0D8;
+    --card: #FFFFFF; --red: #D7392B; --red-dark: #B42A1E; --red-soft: #FBE9E7; --green: #1F8A4C; --green-soft: #E5F4EA;
+    --shadow: 0 1px 2px rgba(26,26,26,.04), 0 12px 32px rgba(26,26,26,.08);
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .wrap { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
-  .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
-  .brand span { color: var(--red); }
-  h1 { font-size: clamp(36px, 8vw, 60px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; margin: 40px 0 16px; }
-  .sub { font-size: clamp(18px, 3.6vw, 21px); line-height: 1.45; color: var(--muted); margin: 0 0 28px; max-width: 34em; }
-  .cta { display: inline-block; background: var(--red); color: #fff; text-decoration: none; font-weight: 800; font-size: 18px; padding: 16px 26px; border-radius: 14px; }
-  .cta-note { display: block; margin-top: 10px; font-size: 14px; color: var(--muted); }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .num { font-variant-numeric: tabular-nums; }
 
-  /* phone mockup of the Home screen */
-  .phone { width: 260px; margin: 48px auto 8px; border: 10px solid var(--ink); border-radius: 38px; background: var(--bg); padding: 18px 14px 20px; }
-  .phone .p-brand { font-weight: 800; font-size: 13px; }
-  .phone .p-top { font-size: 11px; color: var(--muted); font-weight: 600; margin: 2px 0 10px; }
-  .phone .p-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 8px; }
-  .phone .p-label { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-  .phone .p-big { font-size: 24px; font-weight: 800; color: var(--red); letter-spacing: -0.02em; margin: 2px 0; }
-  .phone .p-small { font-size: 12px; }
-  .phone .p-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
-  .phone .p-btns div { background: var(--red); color: #fff; text-align: center; font-weight: 800; font-size: 13px; padding: 10px 0; border-radius: 10px; }
+  /* nav */
+  .nav { position: sticky; top: 0; z-index: 10; background: rgba(250,247,242,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+  .nav.scrolled { border-color: var(--line); }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { font-weight: 900; font-size: 20px; letter-spacing: -0.035em; text-decoration: none; }
+  .brand i { color: var(--red); font-style: normal; }
+  .nav-cta { background: var(--ink); color: #fff; text-decoration: none; font-weight: 800; font-size: 14px; padding: 10px 16px; border-radius: 12px; }
 
-  section { margin-top: 64px; }
-  h2 { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 16px; }
-  blockquote { margin: 0; padding: 0 0 0 20px; border-left: 4px solid var(--red); font-size: clamp(19px, 3.8vw, 23px); line-height: 1.45; font-weight: 600; }
-  .points { list-style: none; padding: 0; margin: 0; counter-reset: n; }
-  .points li { counter-increment: n; display: grid; grid-template-columns: 44px 1fr; gap: 8px; padding: 18px 0; border-top: 1px solid var(--line); font-size: 18px; line-height: 1.45; }
-  .points li::before { content: counter(n); font-weight: 800; font-size: 28px; color: var(--red); line-height: 1; }
-  .points b { display: block; font-size: 20px; margin-bottom: 2px; }
-  .final { text-align: center; padding: 40px 0 0; border-top: 2px solid var(--ink); }
-  .final p { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 20px; }
-  footer { margin-top: 56px; font-size: 13px; color: var(--muted); text-align: center; }
+  /* buttons */
+  .cta { display: inline-flex; align-items: center; gap: 10px; background: var(--red); color: #fff; text-decoration: none; font-weight: 800; font-size: 18px; padding: 18px 26px; border-radius: 16px; box-shadow: 0 10px 28px rgba(215,57,43,.3); transition: transform .15s, background .2s; }
+  .cta:hover { background: var(--red-dark); transform: translateY(-1px); }
+  .cta svg { width: 20px; height: 20px; }
+  .ghost { display: inline-flex; align-items: center; font-weight: 700; font-size: 16px; padding: 18px 8px; text-decoration: underline; text-underline-offset: 4px; }
+
+  /* hero */
+  .hero { padding: 56px 0 72px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--red); background: var(--red-soft); padding: 7px 12px; border-radius: 999px; }
+  h1 { font-size: clamp(44px, 7.2vw, 84px); line-height: .96; letter-spacing: -0.05em; font-weight: 900; margin: 18px 0 20px; }
+  h1 em { font-style: normal; color: var(--red); }
+  .lede { font-size: clamp(18px, 2.2vw, 21px); line-height: 1.5; color: var(--muted); margin: 0 0 30px; max-width: 32em; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .trust { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 26px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .trust span { display: inline-flex; align-items: center; gap: 6px; }
+  .trust svg { width: 16px; height: 16px; color: var(--green); }
+
+  /* phone */
+  .phone-stage { position: relative; display: flex; justify-content: center; }
+  .phone-stage::before { content: ""; position: absolute; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(215,57,43,.16), rgba(215,57,43,0) 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .phone { position: relative; width: 300px; border: 11px solid var(--ink); border-radius: 46px; background: var(--bg); padding: 22px 14px 18px; box-shadow: 0 40px 80px rgba(26,26,26,.22); }
+  .phone::before { content: ""; position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 84px; height: 22px; background: var(--ink); border-radius: 99px; }
+  .p-head { display: flex; justify-content: space-between; align-items: center; margin: 18px 2px 10px; }
+  .p-brand { font-weight: 900; font-size: 13px; letter-spacing: -0.03em; } .p-brand i { color: var(--red); font-style: normal; }
+  .p-saved { font-size: 9px; font-weight: 700; color: var(--green); background: var(--green-soft); padding: 4px 7px; border-radius: 99px; }
+  .p-lvl { font-size: 10px; font-weight: 700; color: var(--muted); margin: 0 2px; } .p-lvl b { display: block; font-size: 19px; color: var(--ink); font-weight: 900; letter-spacing: -0.03em; }
+  .p-hold { display: flex; justify-content: space-between; align-items: center; background: var(--ink); color: #fff; border-radius: 14px; padding: 10px 11px; margin: 10px 0 8px; font-size: 11px; }
+  .p-hold b { display: block; font-size: 12px; } .p-hold span { opacity: .8; } .p-hold .t { font-weight: 800; opacity: 1; }
+  .p-hold .mini { background: rgba(255,255,255,.16); padding: 5px 8px; border-radius: 8px; font-weight: 800; font-size: 10px; }
+  .p-card { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: center; background: #fff; border-radius: 16px; padding: 11px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 14px rgba(0,0,0,.05); }
+  .p-ring { position: relative; width: 74px; height: 74px; }
+  .p-ring svg { width: 74px; height: 74px; transform: rotate(-90deg); }
+  .p-ring .fill { transition: stroke-dashoffset 1.6s cubic-bezier(.2,.8,.2,1); }
+  .p-ring .mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .p-ring .mid b { font-size: 24px; font-weight: 900; line-height: 1; } .p-ring .mid span { font-size: 7px; font-weight: 800; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .p-label { font-size: 9px; font-weight: 800; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .p-big { font-size: 15px; font-weight: 900; letter-spacing: -0.02em; margin: 2px 0; line-height: 1.15; }
+  .p-small { font-size: 10px; color: var(--muted); } .p-small b { color: var(--ink); }
+  .p-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .p-btns div { background: var(--red); color: #fff; text-align: center; font-weight: 800; font-size: 12px; padding: 10px 0; border-radius: 11px; }
+  .p-tabs { display: grid; grid-template-columns: repeat(3,1fr); margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 8px; font-weight: 700; color: var(--faint); text-align: center; }
+  .p-tabs .on { color: var(--red); }
+  .float { position: absolute; background: #fff; border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 10px; animation: bob 4s ease-in-out infinite; }
+  .float small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .float .ic { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .float { z-index: 2; white-space: nowrap; }
+  .float.f1 { right: calc(50% + 150px); top: 150px; } .float.f1 .ic { background: var(--green-soft); }
+  .float.f2 { left: calc(50% + 150px); bottom: 70px; animation-delay: -2s; } .float.f2 .ic { background: var(--red-soft); }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* sections */
+  section { padding: 88px 0; }
+  .kicker { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin: 0 0 14px; }
+  h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.02; letter-spacing: -0.045em; font-weight: 900; margin: 0 0 18px; max-width: 16em; }
+  .sub { font-size: 18px; line-height: 1.55; color: var(--muted); max-width: 36em; margin: 0; }
+
+  /* problem */
+  .problem { background: var(--ink); color: #fff; }
+  .problem .kicker { color: #FF8A7E; }
+  .problem .grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; align-items: start; margin-top: 36px; }
+  blockquote { margin: 0; font-size: clamp(21px, 2.6vw, 28px); line-height: 1.42; font-weight: 600; letter-spacing: -0.015em; }
+  blockquote::before { content: "“"; display: block; font-size: 80px; line-height: .6; color: var(--red); font-weight: 900; margin-bottom: 8px; }
+  .quote-by { margin-top: 18px; font-size: 14px; color: rgba(255,255,255,.6); font-weight: 600; }
+  .stat { border: 1px solid rgba(255,255,255,.14); border-radius: 22px; padding: 26px; margin-bottom: 14px; }
+  .stat b { display: block; font-size: 54px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; color: #fff; }
+  .stat b span { color: #FF8A7E; }
+  .stat p { margin: 10px 0 0; color: rgba(255,255,255,.75); line-height: 1.5; font-size: 15px; }
+  .stat a { color: rgba(255,255,255,.55); font-size: 12px; }
+
+  /* how it works */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; }
+  .step { background: var(--card); border-radius: 24px; padding: 28px; box-shadow: var(--shadow); }
+  .step .n { width: 40px; height: 40px; border-radius: 12px; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; margin-bottom: 18px; }
+  .step h3 { font-size: 22px; letter-spacing: -0.03em; margin: 0 0 8px; }
+  .step p { margin: 0; color: var(--muted); line-height: 1.55; }
+  .ladder { background: var(--card); border-radius: 24px; padding: 30px 28px 22px; box-shadow: var(--shadow); margin-top: 16px; }
+  .ladder-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .ladder-head b { font-size: 18px; letter-spacing: -0.02em; } .ladder-head span { font-size: 14px; color: var(--muted); }
+  .bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; align-items: end; height: 220px; }
+  .bars .col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 8px; }
+  .bars .bar { width: 100%; max-width: 92px; border-radius: 14px 14px 6px 6px; background: var(--line); height: 0; min-height: 0; transition: height 1s cubic-bezier(.2,.8,.2,1); overflow: hidden; display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; font-weight: 900; font-size: 15px; color: var(--ink); }
+  .bars .bar.m { background: var(--ink); color: #fff; }
+  .bars .bar.goal { background: var(--red); color: #fff; }
+  .bars.go .bar { height: var(--h); }
+  .bars.go .col:nth-child(2) .bar { transition-delay: .11s; } .bars.go .col:nth-child(3) .bar { transition-delay: .22s; }
+  .bars.go .col:nth-child(4) .bar { transition-delay: .33s; } .bars.go .col:nth-child(5) .bar { transition-delay: .44s; }
+  .bars.go .col:nth-child(6) .bar { transition-delay: .55s; }
+  .bars .bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .bars .lab { font-size: 12px; font-weight: 700; color: var(--muted); text-align: center; }
+  .ladder-note { display: flex; gap: 10px; align-items: center; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 15px; }
+  .ladder-note b { color: var(--red); }
+
+  /* features */
+  .features { background: var(--bg2); }
+  .fgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; }
+  .f { background: var(--card); border-radius: 24px; padding: 26px; box-shadow: var(--shadow); }
+  .f.big { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; background: var(--ink); color: #fff; }
+  .f.big p { color: rgba(255,255,255,.75); }
+  .f .ico { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--bg2); margin-bottom: 16px; }
+  .f.big .ico { background: rgba(255,255,255,.1); }
+  .f h3 { font-size: 21px; letter-spacing: -0.03em; margin: 0 0 8px; }
+  .f p { margin: 0; color: var(--muted); line-height: 1.55; font-size: 15.5px; }
+  .tag-new { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .08em; background: var(--red); color: #fff; padding: 3px 7px; border-radius: 6px; margin-left: 6px; vertical-align: 3px; }
+  .resist-demo { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 22px; text-align: center; }
+  .resist-demo .clock { font-size: 56px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
+  .resist-demo .msg { font-size: 14px; color: rgba(255,255,255,.7); margin: 8px 0 16px; min-height: 20px; }
+  .resist-demo button { font: inherit; border: 0; cursor: pointer; background: var(--red); color: #fff; font-weight: 800; padding: 12px 18px; border-radius: 12px; font-size: 15px; }
+  .sms { background: var(--bg2); border-radius: 18px 18px 18px 6px; padding: 14px 16px; font-size: 13.5px; line-height: 1.55; margin-top: 16px; white-space: pre-line; }
+
+  /* compare */
+  .compare { margin-top: 40px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; }
+  .compare table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+  .compare th, .compare td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .compare tr:last-child td { border-bottom: 0; }
+  .compare th { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--bg2); }
+  .compare th.us { color: var(--red); }
+  .compare td:first-child { font-weight: 700; width: 28%; }
+  .compare td.us { font-weight: 700; }
+  .yes { color: var(--green); font-weight: 900; margin-right: 6px; } .no { color: var(--faint); font-weight: 900; margin-right: 6px; }
+
+  /* calculator */
+  .calc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
+  .calc .in, .calc .out { border-radius: 24px; padding: 30px; }
+  .calc .in { background: var(--card); box-shadow: var(--shadow); }
+  .calc .out { background: var(--red); color: #fff; display: flex; flex-direction: column; justify-content: center; }
+  .field { margin-bottom: 22px; }
+  .field label { display: flex; justify-content: space-between; font-weight: 700; font-size: 15px; margin-bottom: 10px; }
+  .field label output { font-weight: 900; color: var(--red); font-size: 18px; }
+  input[type=range] { width: 100%; accent-color: var(--red); height: 28px; }
+  .calc .big { font-size: clamp(48px, 7vw, 76px); font-weight: 900; letter-spacing: -0.05em; line-height: .95; }
+  .calc .lbl { font-size: 15px; opacity: .85; font-weight: 600; margin-bottom: 4px; }
+  .calc .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 26px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.25); }
+  .calc .row2 b { display: block; font-size: 30px; font-weight: 900; letter-spacing: -0.04em; }
+  .calc .row2 span { font-size: 13px; opacity: .85; }
+  .fine { font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+  /* faq */
+  .faq { max-width: 760px; margin-top: 36px; }
+  details { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  summary { list-style: none; cursor: pointer; padding: 20px 22px; font-weight: 800; font-size: 17px; letter-spacing: -0.01em; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-size: 24px; line-height: 1; color: var(--red); transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin: 0; padding: 0 22px 20px; color: var(--muted); line-height: 1.6; }
+
+  /* final */
+  .final { text-align: center; }
+  .final h2 { margin: 0 auto 18px; }
+  .final .sub { margin: 0 auto 30px; }
+  footer { padding: 34px 0 48px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+  /* reveal */
+  .rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .rv.in { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .hero .wrap, .problem .grid, .calc, .f.big { grid-template-columns: 1fr; }
+    .hero { padding-top: 28px; }
+    .phone-stage { margin-top: 12px; }
+    .steps, .fgrid { grid-template-columns: 1fr; }
+    .f.big { grid-column: auto; }
+    section { padding: 64px 0; }
+    .bars { height: 180px; gap: 7px; }
+    .bars .bar { font-size: 12px; }
+    .compare th, .compare td { padding: 13px 12px; font-size: 14px; }
+  }
+  @media (max-width: 680px) { .float { display: none; } }
+  @media (max-width: 420px) { .nav-cta { display: none; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .rv { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="brand">No Excuses<span>.</span></div>
 
-  <h1>Cut your habit spending in half. No excuses.</h1>
-  <p class="sub">Log every pizza run and cash purchase in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.</p>
-  <a class="cta" href="../app/index.html">Log your last pizza run</a>
-  <span class="cta-note">Open it on your phone. It takes under 30 seconds.</span>
+<nav class="nav" id="nav"><div class="wrap">
+  <a class="brand" href="#">No Excuses<i>.</i></a>
+  <a class="nav-cta" href="../app/index.html">Open the app</a>
+</div></nav>
 
-  <div class="phone" aria-label="The No Excuses home screen">
-    <div class="p-brand">No Excuses</div>
-    <div class="p-top">Block 2 · Week 3 of 4 · Limit 90%</div>
-    <div class="p-card"><div class="p-label">Pizza</div><div class="p-big">1 pizza trip left</div><div class="p-small">$18 of $54 left</div></div>
-    <div class="p-card"><div class="p-label">Cash</div><div class="p-big">2 cash purchases left</div><div class="p-small">$27 of $31.50 left</div></div>
-    <div class="p-btns"><div>+ Pizza</div><div>+ Cash</div></div>
+<!-- HERO -->
+<header class="hero"><div class="wrap">
+  <div>
+    <span class="eyebrow">For the small buys that add up</span>
+    <h1>Cut your habit spending in <em>half</em>. No excuses.</h1>
+    <p class="lede">Pick the two habits draining your money. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.</p>
+    <div class="hero-actions">
+      <a class="cta" href="../app/index.html">Start your plan
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="ghost" href="#how">See how it works</a>
+    </div>
+    <div class="trust">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>No account</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>No bank login</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Data stays on your phone</span>
+    </div>
   </div>
 
-  <section>
-    <h2>The problem</h2>
-    <blockquote>"Honestly, I have no clue what I spend on pizza. I go two to four times a week, it's like twenty bucks each time, and it never feels like a lot, so I just don't add it up. Same with cash. I cut back once because the people close to me got on me about it, but nobody's doing that for pizza. I'm guessing it's somewhere between $260 and $600 a month, and I genuinely can't tell you which."</blockquote>
-  </section>
+  <div class="phone-stage" aria-label="The No Excuses home screen">
+    <div class="float f1"><div class="ic">✋</div><div>You held off<small>+$21 not spent</small></div></div>
+    <div class="float f2"><div class="ic">⏱️</div><div>$19 pizza<small>= 1.3 hours of work</small></div></div>
+    <div class="phone">
+      <div class="p-head"><div class="p-brand">No Excuses<i>.</i></div><div class="p-saved">✓ Saved 9:41 PM</div></div>
+      <div class="p-lvl">Block 2 · week 3 of 4<b>90% limit</b></div>
+      <div class="p-hold"><div><b>✋ Holding off on Pizza</b><span>Wait it out. <span class="t num" id="heroClock">9:59</span> to go</span></div><div class="mini">I caved</div></div>
+      <div class="p-card">
+        <div class="p-ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" fill="none" stroke="#ECE6DE" stroke-width="8"/><circle class="fill" data-to="0.66" cx="37" cy="37" r="31" fill="none" stroke="#D7392B" stroke-width="8" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8"/></svg>
+          <div class="mid"><b>1</b><span>buy left</span></div></div>
+        <div><div class="p-label">🍕 Pizza</div><div class="p-big">Last one this week</div><div class="p-small"><b>$18</b> of $54 left</div></div>
+      </div>
+      <div class="p-card">
+        <div class="p-ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" fill="none" stroke="#ECE6DE" stroke-width="8"/><circle class="fill" data-to="0.3" cx="37" cy="37" r="31" fill="none" stroke="#D7392B" stroke-width="8" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8"/></svg>
+          <div class="mid"><b>2</b><span>buys left</span></div></div>
+        <div><div class="p-label">💵 Cash</div><div class="p-big">2 cash buys left</div><div class="p-small"><b>$22</b> of $31.50 left</div></div>
+      </div>
+      <div class="p-btns"><div>+ Pizza</div><div>+ Cash</div></div>
+      <div class="p-tabs"><div class="on">Home</div><div>History</div><div>Plan</div></div>
+    </div>
+  </div>
+</div></header>
 
-  <section>
-    <h2>How it helps</h2>
-    <ol class="points">
-      <li><div><b>You see the real number.</b>Spend the first four weeks just logging, so you learn what you actually spend instead of guessing.</div></li>
-      <li><div><b>You see how many trips you have left before you buy.</b>The app turns your weekly limit into "1 pizza trip left," so you feel the limit before you spend, not after.</div></li>
-      <li><div><b>The limit drops whether you're ready or not.</b>Every four weeks it falls by 10% of your starting number, until you're at half. Missing a target doesn't slow it down.</div></li>
-    </ol>
-  </section>
+<!-- PROBLEM -->
+<section class="problem"><div class="wrap">
+  <p class="kicker rv">The problem</p>
+  <h2 class="rv">It never feels like a lot. That's the problem.</h2>
+  <div class="grid">
+    <div class="rv">
+      <blockquote>Honestly, I have no clue what I spend on pizza. I go two to four times a week, it's like twenty bucks each time, and it never feels like a lot, so I just don't add it up. Same with cash. I cut back once because the people close to me got on me about it, but nobody's doing that for pizza.</blockquote>
+      <div class="quote-by">A college student, describing the problem this app was built for</div>
+    </div>
+    <div class="rv">
+      <div class="stat"><b class="num">$260<span>–</span>$600</b><p>Their honest estimate of what two habits cost them each month. They couldn't say which end was true. That gap <em>is</em> the problem.</p></div>
+      <div class="stat"><b class="num">43<span>%</span></b><p>of college students surveyed said they don't track their monthly spending.<br><a href="https://lendedu.com/blog/college-students-and-personal-finance-study" target="_blank" rel="noopener">LendEDU, 2016 College Students and Personal Finance Study (455 students)</a></p></div>
+    </div>
+  </div>
+</div></section>
 
-  <section class="final">
-    <p>Start with the last one you bought.</p>
-    <a class="cta" href="../app/index.html">Log your last pizza run</a>
-  </section>
+<!-- HOW -->
+<section id="how"><div class="wrap">
+  <p class="kicker rv">How it works</p>
+  <h2 class="rv">Four weeks to find your number. Then it drops.</h2>
+  <p class="sub rv">No budget spreadsheet. No categories to sort. Just two habits and a limit that keeps getting tighter.</p>
+  <div class="steps">
+    <div class="step rv"><div class="n">1</div><h3>Name your two habits</h3><p>Pizza runs, coffee, delivery, whatever's quietly draining you. Pick an emoji. That's the whole setup.</p></div>
+    <div class="step rv"><div class="n">2</div><h3>Log for four weeks</h3><p>Every buy, in seconds, right at the counter. No limits yet. This is how you learn your real number instead of guessing.</p></div>
+    <div class="step rv"><div class="n">3</div><h3>Watch the limit drop</h3><p>Your weekly limit starts at 90% of that number and falls 10 points every four weeks. Hit or miss, it keeps falling.</p></div>
+  </div>
+  <div class="ladder rv" id="ladder">
+    <div class="ladder-head"><b>Your weekly limit, block by block</b><span>Each block = 4 weeks · one skip per block for breaks</span></div>
+    <div class="bars">
+      <div class="col"><div class="bar-wrap"><div class="bar m" style="--h:100%">100</div></div><div class="lab">Block 1<br>Measure</div></div>
+      <div class="col"><div class="bar-wrap"><div class="bar" style="--h:90%">90</div></div><div class="lab">Block 2</div></div>
+      <div class="col"><div class="bar-wrap"><div class="bar" style="--h:80%">80</div></div><div class="lab">Block 3</div></div>
+      <div class="col"><div class="bar-wrap"><div class="bar" style="--h:70%">70</div></div><div class="lab">Block 4</div></div>
+      <div class="col"><div class="bar-wrap"><div class="bar" style="--h:60%">60</div></div><div class="lab">Block 5</div></div>
+      <div class="col"><div class="bar-wrap"><div class="bar goal" style="--h:50%">50</div></div><div class="lab">Block 6<br>Goal</div></div>
+    </div>
+    <div class="ladder-note">⚠️ <span><b>Miss a block?</b> The next one drops anyway. No repeats, no second chances. That's the point.</span></div>
+  </div>
+</div></section>
 
-  <footer>No Excuses · MGMT 342 Module 4 · Your data stays on your phone.</footer>
-</div>
+<!-- FEATURES -->
+<section class="features"><div class="wrap">
+  <p class="kicker rv">What's inside</p>
+  <h2 class="rv">Built for the moment you're standing at the counter.</h2>
+  <div class="fgrid">
+    <div class="f big rv">
+      <div>
+        <div class="ico">✋</div>
+        <h3>The resist button<span class="tag-new">NEW</span></h3>
+        <p>Feel the urge? Tap “I want one.” A 10-minute countdown starts. Walk away and it counts as a win, with the money you didn't spend tracked right next to the money you did. Spending trackers see what you already bought. This one also counts what you didn't.</p>
+      </div>
+      <div class="resist-demo">
+        <div class="clock num" id="demoClock">10:00</div>
+        <div class="msg" id="demoMsg">Try it. We sped it up to 10 seconds.</div>
+        <button id="demoBtn">✋ I want one</button>
+      </div>
+    </div>
+    <div class="f rv"><div class="ico">🍕</div><h3>Buys left, not dollars left</h3><p>“1 pizza buy left this week” hits harder than “$18 remaining.” You feel the limit <em>before</em> you buy, not after.</p></div>
+    <div class="f rv"><div class="ico">📲</div><h3>Accountability, one tap</h3><p>Send your week to the person who keeps you honest. It's a plain text through your phone. No accounts, no social feed.</p>
+      <div class="sms">🍕 Pizza: $38 of $54 ✅
+💵 Cash: $40 of $36 ❌ over by $4
+✋ Resisted 3 times ($63 not spent)
+Keep me honest.</div></div>
+    <div class="f rv"><div class="ico">⏱️</div><h3>Cost in hours</h3><p>Add your hourly pay and every buy shows what it really costs: “$19 = 1.3 hours of work.”</p></div>
+    <div class="f rv"><div class="ico">🔥</div><h3>Streaks and money kept</h3><p>See how many weeks in a row you stayed under, and how much you've kept compared to your old pace.</p></div>
+    <div class="f rv"><div class="ico">🔒</div><h3>Private by design</h3><p>No bank login, no account, no server. Your data lives on your phone, with a backup file you control.</p></div>
+  </div>
+</div></section>
+
+<!-- COMPARE -->
+<section><div class="wrap">
+  <p class="kicker rv">Why not a budgeting app?</p>
+  <h2 class="rv">Budgeting apps track everything. This one fixes two things.</h2>
+  <div class="compare rv">
+    <table>
+      <thead><tr><th></th><th>Typical budgeting app</th><th class="us">No Excuses</th></tr></thead>
+      <tbody>
+        <tr><td>What it tracks</td><td>Your whole budget, every category</td><td class="us">Just the two habits you want to cut</td></tr>
+        <tr><td>Setup</td><td>Link your bank, sort categories</td><td class="us"><span class="yes">✓</span>Two names, one Monday</td></tr>
+        <tr><td>When it helps</td><td>After the money's gone, when you review</td><td class="us"><span class="yes">✓</span>At the counter, before you buy</td></tr>
+        <tr><td>Cash purchases</td><td>Often invisible: no bank record</td><td class="us"><span class="yes">✓</span>Logged like everything else</td></tr>
+        <tr><td>The plan</td><td>A budget you set and adjust</td><td class="us"><span class="yes">✓</span>A limit that drops on its own, to half</td></tr>
+        <tr><td>Buys you <em>didn't</em> make</td><td><span class="no">✕</span>Not tracked</td><td class="us"><span class="yes">✓</span>Counted as wins</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div></section>
+
+<!-- CALCULATOR -->
+<section class="features"><div class="wrap">
+  <p class="kicker rv">Do the math</p>
+  <h2 class="rv">What is your habit actually costing you?</h2>
+  <div class="calc rv">
+    <div class="in">
+      <div class="field"><label for="trips">Buys per week <output id="tripsOut">3</output></label><input type="range" id="trips" min="1" max="10" value="3"></div>
+      <div class="field"><label for="cost">Cost per buy <output id="costOut">$20</output></label><input type="range" id="cost" min="5" max="60" value="20"></div>
+      <div class="field" style="margin-bottom:0"><label for="wage">Your hourly pay <output id="wageOut">$15</output></label><input type="range" id="wage" min="8" max="40" value="15"></div>
+      <p class="fine">Your numbers stay in your browser. Nothing is sent anywhere.</p>
+    </div>
+    <div class="out">
+      <div class="lbl">Every year, that habit costs you</div>
+      <div class="big num" id="yearOut">$3,120</div>
+      <div class="lbl" style="margin-top:10px"><b id="hoursOut">208 hours</b> of work</div>
+      <div class="row2">
+        <div><b class="num" id="halfOut">$1,560</b><span>kept per year at half</span></div>
+        <div><b class="num" id="halfHrs">104 hrs</b><span>of your life back</span></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- FAQ -->
+<section><div class="wrap">
+  <p class="kicker rv">Questions</p>
+  <h2 class="rv">Straight answers.</h2>
+  <div class="faq">
+    <details class="rv"><summary>Does it connect to my bank?</summary><p>No. You type each buy in yourself, which takes a few seconds. That's on purpose: no bank login, no account, and cash buys count just like card buys.</p></details>
+    <details class="rv"><summary>Where is my data stored?</summary><p>On your phone, in your browser. Nothing goes to a server. The app confirms every save, and you can download a backup file anytime to protect your history or move it to a new phone.</p></details>
+    <details class="rv"><summary>What happens if I go over my limit?</summary><p>The app shows you, and the card turns red. At the end of the block, the limit still drops to the next level. No repeats, no second chances. That's the "no excuses" part.</p></details>
+    <details class="rv"><summary>What about holidays and breaks?</summary><p>You get one skip per four-week block. A skipped week doesn't count toward anything, and the block runs one week longer so your numbers stay honest.</p></details>
+    <details class="rv"><summary>Does it cost anything?</summary><p>No. It's free, with no ads, no sign-up and no paid tier.</p></details>
+    <details class="rv"><summary>Do I need to download it from an app store?</summary><p>No. It runs in your phone's browser. Open it, then tap Share → Add to Home Screen and it sits on your phone like any other app.</p></details>
+  </div>
+</div></section>
+
+<!-- FINAL -->
+<section class="final" style="padding-top:40px"><div class="wrap">
+  <h2 class="rv">Start with the last one you bought.</h2>
+  <p class="sub rv">Open the app, name your two habits, and pick Monday. It takes a minute.</p>
+  <a class="cta rv" href="../app/index.html">Start your plan
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+</div></section>
+
+<footer><div class="wrap">
+  <span><b style="color:var(--ink)">No Excuses.</b> Free. Your data stays on your phone.</span>
+  <span>MGMT 342 · Module 4 · Xavier University</span>
+</div></footer>
+
+<script>
+(function () {
+  // nav border on scroll
+  var nav = document.getElementById('nav');
+  addEventListener('scroll', function () { nav.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
+
+  // reveal on scroll (+ ladder bars, hero rings)
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function growLadder() { document.querySelector('.bars').classList.add('go'); }
+  if ('IntersectionObserver' in window && !reduce) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        if (e.target.id === 'ladder') growLadder();
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.rv').forEach(function (el) { io.observe(el); });
+  } else { document.querySelectorAll('.rv').forEach(function (el) { el.classList.add('in'); }); growLadder(); }
+
+  setTimeout(function () {
+    document.querySelectorAll('.p-ring .fill').forEach(function (c) { c.setAttribute('stroke-dashoffset', 194.8 * (1 - Number(c.getAttribute('data-to')))); });
+  }, 300);
+
+  // hero countdown (decorative)
+  var hc = document.getElementById('heroClock'), hs = 599;
+  setInterval(function () { hs = hs <= 0 ? 599 : hs - 1; hc.textContent = Math.floor(hs / 60) + ':' + String(hs % 60).padStart(2, '0'); }, 1000);
+
+  // resist demo: 10 seconds standing in for 10 minutes
+  var dc = document.getElementById('demoClock'), dm = document.getElementById('demoMsg'), db = document.getElementById('demoBtn'), timer = null, kept = 0;
+  db.onclick = function () {
+    if (timer) { clearInterval(timer); timer = null; dc.textContent = '10:00'; dm.textContent = 'You caved. It happens. Try again.'; db.textContent = '✋ I want one'; return; }
+    var t = 10; dc.textContent = '10:00'; dm.textContent = 'Wait it out…'; db.textContent = 'I caved';
+    timer = setInterval(function () {
+      t--; dc.textContent = t + ':00';
+      if (t <= 0) { clearInterval(timer); timer = null; kept += 21; dc.textContent = '✓'; dm.textContent = 'You held off. +$21 not spent · $' + kept + ' this session'; db.textContent = '✋ Try again'; }
+    }, 1000);
+  };
+
+  // calculator
+  function fmt(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  var T = document.getElementById('trips'), C = document.getElementById('cost'), W = document.getElementById('wage');
+  function calc() {
+    var t = +T.value, c = +C.value, w = +W.value, year = t * c * 52, hrs = year / w;
+    document.getElementById('tripsOut').textContent = t;
+    document.getElementById('costOut').textContent = '$' + c;
+    document.getElementById('wageOut').textContent = '$' + w;
+    document.getElementById('yearOut').textContent = fmt(year);
+    document.getElementById('hoursOut').textContent = Math.round(hrs) + ' hours';
+    document.getElementById('halfOut').textContent = fmt(year / 2);
+    document.getElementById('halfHrs').textContent = Math.round(hrs / 2) + ' hrs';
+  }
+  [T, C, W].forEach(function (el) { el.addEventListener('input', calc); });
+  calc();
+})();
+</script>
 </body>
 </html>
