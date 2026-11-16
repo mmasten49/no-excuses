@@ -282,6 +282,35 @@
     return { now: Math.round(total / weeks.length * 52), old: starts.final ? Math.round(starts[cat] / 4 * 52) : null, weeks: weeks.length };
   }
 
+  // ---------- Demo mode ----------
+  // Sample data for testers: block 2, week 3. Block 1 had pizza $60/wk and cash $40/wk,
+  // so the limits are $54 and $36. Two finished block-2 weeks under the limit = a 2-week streak.
+  // This week: one cash buy, no pizza yet → 2 Pizza buys left. Log a ~$20 pizza → "Last one this week."
+  function makeDemo(now) {
+    var thisMon = mondayOptions(now)[0];
+    var d = new Date(thisMon); d.setDate(d.getDate() - 42);
+    var start = d.getTime(), P = [], n = 0;
+    function buy(k, cat, amount, dayOffset, hour) {
+      var t = new Date(weekStart(start, k)); t.setDate(t.getDate() + dayOffset); t.setHours(hour, 0, 0, 0);
+      P.push({ id: 'demo-' + (n++), cat: cat, amount: amount, ts: t.getTime() });
+    }
+    for (var k = 0; k < 4; k++) {               // block 1: measuring
+      buy(k, 'a', 22, 1, 19); buy(k, 'a', 19, 3, 20); buy(k, 'a', 19, 5, 21);
+      buy(k, 'b', 20, 2, 17); buy(k, 'b', 20, 5, 16);
+    }
+    buy(4, 'a', 20, 1, 19); buy(4, 'a', 19, 4, 20); buy(4, 'b', 20, 3, 17);   // under: 39/54, 20/36
+    buy(5, 'a', 21, 2, 19); buy(5, 'a', 18, 5, 21); buy(5, 'b', 15, 3, 16);   // under: 39/54, 15/36
+    var cur = new Date(thisMon); cur.setHours(9, 0, 0, 0);
+    P.push({ id: 'demo-' + (n++), cat: 'b', amount: 15, ts: Math.min(cur.getTime(), now) });
+    var t = now - 2 * 864e5;
+    return {
+      demo: true, startTs: start, purchases: P, skips: [], seenReport: 2, wage: 15, why: 'Spring break fund',
+      habits: { a: { name: 'Pizza', emoji: '🍕' }, b: { name: 'Cash', emoji: '💵' } },
+      resists: [{ id: 'demo-r1', cat: 'a', ts: t, until: t + RESIST_MS, amount: 20, status: 'won' }],
+      sharedWeeks: []
+    };
+  }
+
   // Older saves used fixed 'pizza' / 'cash' categories. Move them into the generic slots a / b.
   function migrate(obj) {
     if (!obj || typeof obj !== 'object') return obj;
@@ -304,6 +333,6 @@
     weekMap: weekMap, compute: compute, tripsLeft: tripsLeft, mondayOptions: mondayOptions,
     weekSummary: weekSummary, stats: stats, blocks: blocks, quickAmounts: quickAmounts, validBackup: validBackup, migrate: migrate,
     RESIST_MS: RESIST_MS, typicalBuy: typicalBuy, resolveResists: resolveResists, resistStats: resistStats,
-    workTime: workTime, yearlyPace: yearlyPace
+    workTime: workTime, yearlyPace: yearlyPace, makeDemo: makeDemo
   };
 })(typeof window !== 'undefined' ? window : globalThis);

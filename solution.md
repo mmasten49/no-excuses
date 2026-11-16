@@ -32,7 +32,7 @@
 - **Top:** "Block 3 · week 2 of 4" with a big "80% limit" (or "Measuring" in block 1), plus a "Resets in 3d 15h" countdown and a thin bar showing how far through the week you are.
 - **Block-end message:** shown once, on the first open after a block ends. Each category shows **HIT IT** or **MISSED BY $14**, then "New limit: 80%." Tap **Let's go** to close it.
 - **Two cards, Pizza and Cash.** Each one has a **progress ring** that fills as you spend toward the weekly limit. Inside the ring is the number of purchases left, which is the biggest text on the screen. Next to the ring:
-  - **A headline:** "2 pizza trips left," "Last one this week," "Done for the week," or "Over by $12" (the card turns red when you're over).
+  - **A headline:** "2 Pizza buys left," "Last one this week," "Done for the week," or "Over by $12" (the card turns red when you're over).
   - **Dollars left:** "$18 of $54 left."
   - **Pace warning:** if you've used at least half the limit **and** your share of the limit used is more than 25 points ahead of your share of the week gone by, a line appears: "⚠️ 81% used, 4 days in." It compares dollars against days, not purchase timestamps, so logging late doesn't break it. It's hidden once you're over the limit or out of buys.
   - **If a habit has no average yet** (nothing logged in block 1), the headline shows "$X left this week" instead of a buy count.
@@ -85,6 +85,19 @@
   - **A plain-English explanation of what survives:** closing the app and restarting the phone. What doesn't: clearing browser data or switching browsers.
   - **Download backup:** saves a `.json` file with everything. On phones that support sharing files, it opens the share sheet ("Save to Files," AirDrop, etc.), which works better than a download from a home-screen app. Otherwise it downloads the file.
   - **Restore from backup:** pick that file, see what it contains, confirm, and it replaces what's on the phone. A file that isn't a valid backup is rejected and nothing changes.
+
+### Demo mode (for testers and anyone just looking)
+- **Two ways in:**
+  - a **"👀 Just looking? Try it with sample data"** button on setup step 1
+  - the link **`app/?demo=1`**, which the landing page's "Try the demo" buttons use
+- **The link never overwrites a real plan.** If the phone already has a real plan, `?demo=1` is ignored and the real plan opens.
+- **The sample plan is always the same**, no matter what day it's opened:
+  - block 2, week 3, at the 90% limit
+  - Pizza 🍕: $54 a week, Cash 💵: $36 a week
+  - this week so far: **2 Pizza buys left**, and Cash at $21 of $36
+  - a 2-week streak, pay set to $15 an hour, and why set to "Spring break fund"
+  - **Logging a ~$19 Pizza buy → "1 Pizza buy left · Last one this week."** That's the classmate test task.
+- **A yellow bar under the header,** "👀 Demo · sample data," shows on every screen with a **Start for real** button. That button asks first, then clears the sample data and goes to setup.
 
 ### Installing and offline use
 - **Add to Home Screen** gives a real app icon (a red "NE." square) and opens full screen, with no browser bars.

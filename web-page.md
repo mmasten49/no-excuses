@@ -34,6 +34,8 @@ Shown next to two numbers:
 8. **Final call to action:** "Start with the last one you bought," with the "Start your plan" button.
 
 ## What to do next
+**Two paths:** "Start your plan" (a real setup) or **"👀 Try the demo"** (`../app/?demo=1`, sample data already in week 7). The demo link is in the hero, under the final button, and in a FAQ answer ("Can I try it before I start?").
+
 Open the app, name your two habits and pick a Monday. The classmate test task is: log a pizza buy and find how many buys are left, in under 30 seconds.
 
 ## Look and feel

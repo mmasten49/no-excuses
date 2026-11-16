@@ -34,24 +34,28 @@ What I need to show: students who spend on one or two habits every week (food ru
   - The "$282 a month average impulse spending" figure (only on secondhand sites, original report not found).
 
 ### What people who have it say
-Survey results (1 response as of Nov 12, 4:23 PM):
+Survey results (3 responses as of Nov 16, 5:53 PM):
 
-| Question | Answer |
-|---|---|
-| 1. Spend on habits without knowing the total? | **No** |
-| 2. How often? | Less than once a week |
-| 3. Monthly spend? | $100–250 |
-| 4. How do you track it? | In my head, bank app, notes or spreadsheet |
-| 5. Likely to use it for a month? (1–5) | **4** |
-| 6. Most helpful part? | **The step-by-step cut plan** |
-| 7. What would stop you, or what would it need? | "I would use it" |
+| Question | Response 1 | Response 2 | Response 3 |
+|---|---|---|---|
+| 1. Spend on habits without knowing the total? | **No** | **Yes** | **Yes** |
+| 2. How often? | Less than once a week | 3–5 times a week | 3–5 times a week |
+| 3. Monthly spend? | $100–250 | $250–500 | $250–500 |
+| 4. How do you track it? | In my head, bank app, notes or spreadsheet | I don't, in my head | In my head |
+| 5. Likely to use it for a month? (1–5) | 4 | 4 | 3 |
+| 6. Most helpful part? | The step-by-step cut plan | Seeing my real monthly total | Having a weekly limit |
+| 7. What would stop you, or what would it need? | "I would use it" | *(blank)* | "Probably just change to new mindset on the habit" |
 
 **What this tells me:**
-- **This person does not have the problem as written.** They say they know their total and track it three ways. That matches my own "I'm wrong" test.
-- **They would still use the app, mainly for the cut plan.** That suggests the plan to cut spending may be worth more than the tracking. People who already track still don't have a way to cut back step by step.
-- **It's one response.** It can't prove or disprove anything on its own. I need more.
-- **The form was built before "trips left this week" was added**, so this respondent never saw or rated that feature.
-Who I sent it to: [FILL IN: 1–2 STUDENTS WHO ACTUALLY HAVE A HABIT LIKE THIS.]
+- **2 of 3 have the problem as written.** Both say yes, buy 3–5 times a week, spend $250–500 a month, and track only in their head or not at all. That lines up with my own numbers ($260–600 a month, 3–6 buys a week).
+- **1 of 3 doesn't.** Response 1 buys less than once a week and tracks three ways. That passes my own "I'm wrong" test for that person. The problem is real for frequent buyers, not for everyone.
+- **Interest is moderate, not strong.** The ratings are 4, 4 and 3, an average of 3.7 out of 5. Nobody picked "None of these would help me," and nobody rated it 1–2.
+- **Each person valued a different part:** the cut plan, the real monthly total, and the weekly limit. All three core pieces of the app got picked once. No single feature carries it.
+- **Response 3 is the strongest pushback:** "Probably just change to new mindset on the habit." That's the willpower-only approach. My own history argues against it (my cash cutback took outside accountability, not just a mindset), and that's why the app has the accountability text and the resist button. But it's a fair challenge, and the classmate test should check it.
+- **Nobody picked "No idea" on monthly spend.** People think they know a range. Whether that range is accurate is exactly what block 1 (four weeks of measuring) is designed to test.
+- **Limits:** 3 responses is a small sample. The form was built before the resist button, "buys left," the accountability text and cost in hours existed, so nobody rated those.
+
+Who I sent it to: [FILL IN: WHO THE 3 RESPONDENTS ARE, FOR EXAMPLE "ROOMMATE, TWO FRIENDS". NO NAMES NEEDED.]
 What would tell me I am wrong:
 - They say they already know their monthly total (Q3 is a dollar range, not "No idea"), **and** they track it with a bank app, notes or a budgeting app (Q4).
 - They rate the app 1–2 out of 5 (Q5), or they pick "None of these would help me" (Q6).
@@ -59,12 +63,12 @@ What would tell me I am wrong:
 
 ## The app helps
 Who tests it: a classmate, on November 17.
-What they do: read the web page, then do one task in the app: **log a pizza purchase and find out how many trips they have left this week.**
+What they do: read the web page, then do one task in the app: **open the demo, log a pizza purchase, and find out how many Pizza buys they have left this week.**
 What I write down:
-- How long the task takes, from opening the app to seeing "trips left." Target: under 30 seconds.
+- How long the task takes, from opening the app to seeing "buys left." Target: under 30 seconds.
 - Every place they get stuck, hesitate or ask a question.
 - Whether they can explain, in their own words, what the weekly limit is and how it shrinks each month.
 What would tell me I am wrong:
 - Logging a purchase takes longer than 30 seconds, or they need help to finish it.
-- They can't find or read the "trips left" number without being told where it is.
+- They can't find or read the "buys left" number without being told where it is.
 - After reading the web page, they can't say what the app is for.

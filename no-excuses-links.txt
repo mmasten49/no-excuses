@@ -1,0 +1,18 @@
+NO EXCUSES - LINKS
+MGMT 342, Module 4, Matthew Masten
+
+Landing page (explains the app):
+https://mmasten49.github.io/no-excuses/
+
+The app (open on your phone):
+https://mmasten49.github.io/no-excuses/app/
+
+Code on GitHub:
+https://github.com/mmasten49/no-excuses
+
+How to get between them:
+- Landing page to app: tap "Open the app" (top bar) or "Start your plan."
+- App to landing page: tap the "No Excuses." logo (with the "About" tag) in the top-left corner.
+
+Put it on your phone:
+Open the app link in Safari, tap Share, then Add to Home Screen.
