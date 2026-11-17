@@ -1012,7 +1012,7 @@
           var idx = imp.txns.indexOf(t), k = NE.weekIndex(state.startTs, t.ts);
           var out = k < 0 || t.ts > Date.now();
           return '<label class="txn' + (out ? ' out' : '') + '"><input type="checkbox" data-tx="' + idx + '"' + (t.off ? '' : ' checked') + (out ? ' disabled' : '') + '>' +
-            '<span>' + esc(NE.merchantName(t.desc)) + '<br><span class="d">' + md(t.ts) + (out ? ' · before your plan, not added' : '') + '</span></span><b class="num">' + money(t.amount) + '</b></label>';
+            '<span>' + esc(NE.merchantName(t.desc)) + '<br><span class="d">' + md(t.ts) + (out ? ' · before your plan, not added' : t.logged ? ' · looks like one you already logged' : '') + '</span></span><b class="num">' + money(t.amount) + '</b></label>';
         }).join('') + '</details>' : '') + '</div>';
     }).join('');
     var matchedTotal = ord.reduce(function (a, c) { return a + A.byHabit[c].total; }, 0);

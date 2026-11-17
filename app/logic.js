@@ -521,7 +521,7 @@
       .replace(/#\s?\d+/g, ' ').replace(/\b\d{3,}\b/g, ' ').replace(/[*_]/g, ' ')
       .replace(/\b(oh|ky|in|ca|ny|tx|fl|il|pa|mi|ga|nc|wa|co|az|ma|nj|va|tn|mo|wi|mn)\b\s*$/g, '')
       .replace(/\s+/g, ' ').trim();
-    var words = s.split(' ').filter(function (w) { return w && !/^\d+$/.test(w) && !/\.com$/.test(w); }).slice(0, 3);
+    var words = s.split(' ').filter(function (w) { return w && !/\d/.test(w) && !/\.com$/.test(w); }).slice(0, 3);
     if (!words.length) return 'Unknown';
     return words.map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
   }
@@ -534,6 +534,13 @@
     }
     return null;
   }
+  // A statement line that's probably a buy you already logged by hand: same habit, within a day, within $1.
+  function looksLogged(state, t) {
+    if (!t.cat) return false;
+    return (state.purchases || []).some(function (p) {
+      return p.src !== 'import' && p.cat === t.cat && Math.abs(p.ts - t.ts) <= 1.5 * DAY && Math.abs(p.amount - t.amount) <= 1;
+    });
+  }
   // Where the money went: per-habit totals, weekly averages, and the biggest merchants that aren't tracked yet.
   function analyzeStatement(state, txns) {
     var order = cats(state), by = {}, other = {}, totalAll = 0;
@@ -542,7 +549,11 @@
       totalAll += t.amount;
       var c = matchHabit(state, t.desc);
       t.cat = c;
-      if (c) { by[c].count++; by[c].total += t.amount; by[c].txns.push(t); }
+      if (c) {
+        by[c].count++; by[c].total += t.amount; by[c].txns.push(t);
+        t.logged = looksLogged(state, t);
+        if (t.logged && t.off === undefined) t.off = true;   // unchecked by default so it isn't counted twice
+      }
       else {
         var m = merchantName(t.desc);
         other[m] = other[m] || { merchant: m, count: 0, total: 0, sample: t.desc };
@@ -646,6 +657,6 @@
     workTime: workTime, yearlyPace: yearlyPace, makeDemo: makeDemo,
     suggestKeywords: suggestKeywords, addHabit: addHabit, deleteHabit: deleteHabit,
     parseCSV: parseCSV, parseDate: parseDate, parseMoney: parseMoney, statementFromCSV: statementFromCSV, statementFromText: statementFromText,
-    merchantName: merchantName, matchHabit: matchHabit, analyzeStatement: analyzeStatement, applyImport: applyImport, undoImport: undoImport
+    merchantName: merchantName, looksLogged: looksLogged, matchHabit: matchHabit, analyzeStatement: analyzeStatement, applyImport: applyImport, undoImport: undoImport
   };
 })(typeof window !== 'undefined' ? window : globalThis);
