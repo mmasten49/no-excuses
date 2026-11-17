@@ -6,7 +6,7 @@
 Cut your habit spending in half. No excuses.
 
 ## Subhead
-Pick the two habits draining your money. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.
+Pick the habits draining your money, from one to five. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.
 
 **Trust line under the button:** Free · No account · No bank login · Data stays on your phone.
 
@@ -45,3 +45,15 @@ Open the app, name your two habits and pick a Monday. The classmate test task is
 - **Layout:** two columns on desktop and a single column on phones. Sections fade up as you scroll.
 - **Image:** a phone mockup built in code that matches the real app. No stock photos of people or money, and no pizza clip art.
 - **Honesty rule:** no claim the page can't back up. Each research number links to its source. "Typical budgeting app" claims are general, never about a named product.
+
+## Update (Nov 17)
+- **Watch section** right after the hero: the 30-second vertical ad (`web/ad-vertical.mp4`, a 1.3 MB web encode of `media/ad/no-excuses-ad-vertical.mp4`, plus `ad-poster.jpg`) in a phone frame. It plays muted when scrolled into view and pauses when scrolled away, with Play/Pause and Sound buttons. Beside it: "$19 = 57 minutes of work · $1,976 a year · 10 minutes keeps the $19" and a "Try the demo" button. A caption under it says "Sample data · timer sped up · music: Mixkit."
+- **Copy no longer says "two habits":** it's 1–5 habits throughout (hero, how it works, comparison, final call to action).
+- **New tiles:**
+  - "Your statement, decoded" (large tile with a sample breakdown)
+  - "Up to five habits"
+- **New comparison row:** "Bank statements: synced by logging in to your bank through the app" vs. "Optional: open a statement file. It never leaves your phone."
+- **FAQ:**
+  - "Does it connect to my bank?" now covers statement import.
+  - Added "Can I track more than two habits?"
+- **Wage matches the ad:** $20/hour, so $19 = 57 min. The calculator defaults to $20 (3 buys × $20 × 52 = $3,120 = 156 hours).

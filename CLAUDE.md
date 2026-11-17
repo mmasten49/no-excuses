@@ -12,7 +12,7 @@ MGMT 342, Fall 2026. Matthew Masten's Module 4 project: **No Excuses**, a small 
 | `web-page.md` | The copy for the page that explains the app | The web page |
 | `ad-script.md` | A 30–60 second commercial, scene by scene | The ad (Nov 19) |
 | `app/` (`index.html` + `logic.js`) | The working app, built from solution.md. `logic.js` holds all the math. | n/a |
-| `web/index.html` | The marketing page, built from web-page.md. Its button links to `../app/index.html`. | n/a |
+| `web/index.html` | The marketing page, built from web-page.md. Its button links to `../app/index.html`. It embeds `web/ad-vertical.mp4` and `web/ad-poster.jpg`, a small web copy of the vertical ad. | n/a |
 | `test-sheet.md` | The printable sheet for the Nov 17 classmate test. Its results go into evidence.md. | n/a |
 | `no-excuses-links.txt` | The live links to the landing page, the app and GitHub | n/a |
 | `media/ad/` | The motion graphic ad, built from ad-script.md (Session 25) | n/a |

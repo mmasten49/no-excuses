@@ -1,6 +1,6 @@
 // No Excuses: offline support.
 // Network first, so updates show up as soon as you're online. Falls back to the saved copy when there's no signal.
-var CACHE = 'no-excuses-v1';
+var CACHE = 'no-excuses-v2';
 var FILES = ['./', './index.html', './logic.js', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 self.addEventListener('install', function (e) {

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>No Excuses: cut your habit spending in half</title>
-<meta name="description" content="Pick the two habits draining your money. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half.">
+<meta name="description" content="Pick the habits draining your money (one to five). Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half.">
 <meta name="theme-color" content="#FAF7F2">
 <link rel="icon" type="image/png" href="../app/icon-192.png">
 <link rel="apple-touch-icon" href="../app/icon-180.png">
@@ -90,6 +90,28 @@
   .kicker { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin: 0 0 14px; }
   h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.02; letter-spacing: -0.045em; font-weight: 900; margin: 0 0 18px; max-width: 16em; }
   .sub { font-size: 18px; line-height: 1.55; color: var(--muted); max-width: 36em; margin: 0; }
+
+
+  /* watch (ad video) */
+  .watch { padding: 72px 0; background: var(--bg2); }
+  .watch-grid { display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center; }
+  .watch .sub { margin-bottom: 24px; }
+  .watch ul { list-style: none; padding: 0; margin: 0 0 26px; display: grid; gap: 10px; font-size: 16px; font-weight: 600; }
+  .watch li { display: flex; gap: 10px; align-items: baseline; } .watch li b { color: var(--red); }
+  .vid-frame { position: relative; width: 300px; aspect-ratio: 9 / 16; border: 10px solid var(--ink); border-radius: 42px; overflow: hidden; background: var(--bg); box-shadow: 0 40px 80px rgba(26,26,26,.22); }
+  .vid-frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .vid-ctl { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 8px; justify-content: center; }
+  .vid-ctl button { font: inherit; border: 0; cursor: pointer; background: rgba(26,26,26,.82); color: #fff; font-weight: 800; font-size: 13px; padding: 10px 14px; border-radius: 999px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .vid-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; }
+  /* statement demo tile */
+  .stmt-demo { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 16px; }
+  .sd-top { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .sd-top div { background: rgba(255,255,255,.1); border-radius: 12px; padding: 10px 12px; } .sd-top .r { background: var(--red); }
+  .sd-top b { display: block; font-size: 22px; font-weight: 900; letter-spacing: -0.03em; } .sd-top span { font-size: 11px; opacity: .8; }
+  .sd-row { display: flex; justify-content: space-between; padding: 8px 2px; border-top: 1px solid rgba(255,255,255,.12); font-size: 14px; }
+  .sd-row.muted { opacity: .6; }
+  .sd-lock { margin-top: 8px; font-size: 12px; font-weight: 700; color: #8FE0B0; }
+  @media (max-width: 860px) { .watch-grid { grid-template-columns: 1fr; justify-items: center; text-align: left; } .vid-frame { width: min(300px, 80vw); } }
 
   /* problem */
   .problem { background: var(--ink); color: #fff; }
@@ -219,7 +241,7 @@
   <div>
     <span class="eyebrow">For the small buys that add up</span>
     <h1>Cut your habit spending in <em>half</em>. No excuses.</h1>
-    <p class="lede">Pick the two habits draining your money. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.</p>
+    <p class="lede">Pick the habits draining your money, from one to five. Log every buy in seconds. Your weekly limit drops every four weeks, hit or miss, until you're spending half of what you started with.</p>
     <div class="hero-actions">
       <a class="cta" href="../app/index.html">Start your plan
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -236,7 +258,7 @@
 
   <div class="phone-stage" aria-label="The No Excuses home screen">
     <div class="float f1"><div class="ic">✋</div><div>You held off<small>+$21 not spent</small></div></div>
-    <div class="float f2"><div class="ic">⏱️</div><div>$19 pizza<small>= 1.3 hours of work</small></div></div>
+    <div class="float f2"><div class="ic">⏱️</div><div>$19 pizza<small>= 57 min of work</small></div></div>
     <div class="phone">
       <div class="p-head"><div class="p-brand">No Excuses<i>.</i></div><div class="p-saved">✓ Saved 9:41 PM</div></div>
       <div class="p-lvl">Block 2 · week 3 of 4<b>90% limit</b></div>
@@ -256,6 +278,29 @@
     </div>
   </div>
 </div></header>
+
+<!-- WATCH -->
+<section class="watch" id="watch"><div class="wrap watch-grid">
+  <div>
+    <p class="kicker rv">Watch</p>
+    <h2 class="rv">30 seconds. One pizza. No excuses.</h2>
+    <p class="sub rv">What a $19 habit really costs, and what the app does about it.</p>
+    <ul class="rv">
+      <li><b>$19</b> one pizza = 57 minutes of work</li>
+      <li><b>$1,976</b> twice a week, for a year</li>
+      <li><b>10 min</b> the wait that keeps the $19</li>
+    </ul>
+    <a class="cta rv" href="../app/?demo=1">Try the demo
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+  <div class="rv">
+    <div class="vid-frame">
+      <video id="adVid" src="ad-vertical.mp4" poster="ad-poster.jpg" muted playsinline loop preload="metadata" aria-label="No Excuses 30-second ad"></video>
+      <div class="vid-ctl"><button id="vidPlay" type="button">▶ Play</button><button id="vidSnd" type="button">🔇 Sound off</button></div>
+    </div>
+    <p class="vid-note">Sample data · timer sped up · music: Mixkit</p>
+  </div>
+</div></section>
 
 <!-- PROBLEM -->
 <section class="problem"><div class="wrap">
@@ -277,9 +322,9 @@
 <section id="how"><div class="wrap">
   <p class="kicker rv">How it works</p>
   <h2 class="rv">Four weeks to find your number. Then it drops.</h2>
-  <p class="sub rv">No budget spreadsheet. No categories to sort. Just two habits and a limit that keeps getting tighter.</p>
+  <p class="sub rv">No budget spreadsheet. No categories to sort. Just the habits you pick and a limit that keeps getting tighter.</p>
   <div class="steps">
-    <div class="step rv"><div class="n">1</div><h3>Name your two habits</h3><p>Pizza runs, coffee, delivery, whatever's quietly draining you. Pick an emoji. That's the whole setup.</p></div>
+    <div class="step rv"><div class="n">1</div><h3>Name your habits</h3><p>Pizza runs, coffee, delivery: one to five of whatever's quietly draining you. Pick an emoji. That's the whole setup.</p></div>
     <div class="step rv"><div class="n">2</div><h3>Log for four weeks</h3><p>Every buy, in seconds, right at the counter. No limits yet. This is how you learn your real number instead of guessing.</p></div>
     <div class="step rv"><div class="n">3</div><h3>Watch the limit drop</h3><p>Your weekly limit starts at 90% of that number and falls 10 points every four weeks. Hit or miss, it keeps falling.</p></div>
   </div>
@@ -321,24 +366,41 @@
 ✋ Resisted 3 times ($63 not spent)
 Why: spring break fund
 Keep me honest.</div></div>
-    <div class="f rv"><div class="ico">⏱️</div><h3>Cost in hours</h3><p>Add your hourly pay and every buy shows what it really costs: “$19 = 1.3 hours of work.”</p></div>
+    <div class="f rv"><div class="ico">⏱️</div><h3>Cost in hours</h3><p>Add your hourly pay and every buy shows what it really costs: “$19 = 57 minutes of work.”</p></div>
     <div class="f rv"><div class="ico">🔥</div><h3>Streaks and money kept</h3><p>See how many weeks in a row you stayed under, and how much you've kept compared to your old pace.</p></div>
     <div class="f rv"><div class="ico">🔒</div><h3>Private by design</h3><p>No bank login, no account, no server. Your data lives on your phone, with a backup file you control.</p></div>
     <div class="f rv"><div class="ico">🎯</div><h3>Your why, front and center</h3><p>Name what you're saving for. It shows up during every resist countdown and in your weekly text. “Remember: spring break fund.”</p></div>
     <div class="f rv"><div class="ico">📶</div><h3>Works with no signal</h3><p>Add it to your home screen and it opens like an app, even offline. That matters, because the counter is where the decision happens. Tapped the wrong amount? Undo is right there.</p></div>
+
+    <div class="f big rv">
+      <div>
+        <div class="ico">📄</div>
+        <h3>Your statement, decoded<span class="tag-new">NEW</span></h3>
+        <p>Download a card or bank statement (CSV or PDF) and open it in the app. It finds every buy that matches your habits, shows what they really cost per week, and lists where the rest of your money went. Tag a merchant to a habit in one tap. The file is read on your phone and never uploaded.</p>
+      </div>
+      <div class="stmt-demo" aria-label="Example of a decoded statement">
+        <div class="sd-top"><div><b>$268</b><span>10 card buys</span></div><div class="r"><b>$88</b><span>on your habits (33%)</span></div></div>
+        <div class="sd-row"><span>🍕 Pizza · 2 buys</span><b>$41.52</b></div>
+        <div class="sd-row"><span>💵 Cash · ATM</span><b>$40</b></div>
+        <div class="sd-row muted"><span>Kroger · not a habit</span><b>$66.20</b></div>
+        <div class="sd-lock">🔒 Read on this phone only</div>
+      </div>
+    </div>
+    <div class="f rv"><div class="ico">➕</div><h3>Up to five habits</h3><p>Start with one or two. Add more anytime. Each new habit gets its own four measuring weeks, then its own limit on its own clock.</p></div>
   </div>
 </div></section>
 
 <!-- COMPARE -->
 <section><div class="wrap">
   <p class="kicker rv">Why not a budgeting app?</p>
-  <h2 class="rv">Budgeting apps track everything. This one fixes two things.</h2>
+  <h2 class="rv">Budgeting apps track everything. This one fixes the few that matter.</h2>
   <div class="compare rv">
     <table>
       <thead><tr><th></th><th>Typical budgeting app</th><th class="us">No Excuses</th></tr></thead>
       <tbody>
-        <tr><td>What it tracks</td><td>Your whole budget, every category</td><td class="us">Just the two habits you want to cut</td></tr>
-        <tr><td>Setup</td><td>Link your bank, sort categories</td><td class="us"><span class="yes">✓</span>Two names, one Monday</td></tr>
+        <tr><td>What it tracks</td><td>Your whole budget, every category</td><td class="us">Just the 1–5 habits you want to cut</td></tr>
+        <tr><td>Setup</td><td>Link your bank, sort categories</td><td class="us"><span class="yes">✓</span>A few names, one Monday</td></tr>
+        <tr><td>Bank statements</td><td>Synced by logging in to your bank through the app</td><td class="us"><span class="yes">✓</span>Optional: open a statement file. It never leaves your phone.</td></tr>
         <tr><td>When it helps</td><td>After the money's gone, when you review</td><td class="us"><span class="yes">✓</span>At the counter, before you buy</td></tr>
         <tr><td>Cash purchases</td><td>Often invisible: no bank record</td><td class="us"><span class="yes">✓</span>Logged like everything else</td></tr>
         <tr><td>The plan</td><td>A budget you set and adjust</td><td class="us"><span class="yes">✓</span>A limit that drops on its own, to half</td></tr>
@@ -356,16 +418,16 @@ Keep me honest.</div></div>
     <div class="in">
       <div class="field"><label for="trips">Buys per week <output id="tripsOut">3</output></label><input type="range" id="trips" min="1" max="10" value="3"></div>
       <div class="field"><label for="cost">Cost per buy <output id="costOut">$20</output></label><input type="range" id="cost" min="5" max="60" value="20"></div>
-      <div class="field" style="margin-bottom:0"><label for="wage">Your hourly pay <output id="wageOut">$15</output></label><input type="range" id="wage" min="8" max="40" value="15"></div>
+      <div class="field" style="margin-bottom:0"><label for="wage">Your hourly pay <output id="wageOut">$20</output></label><input type="range" id="wage" min="8" max="40" value="20"></div>
       <p class="fine">Your numbers stay in your browser. Nothing is sent anywhere.</p>
     </div>
     <div class="out">
       <div class="lbl">Every year, that habit costs you</div>
       <div class="big num" id="yearOut">$3,120</div>
-      <div class="lbl" style="margin-top:10px"><b id="hoursOut">208 hours</b> of work</div>
+      <div class="lbl" style="margin-top:10px"><b id="hoursOut">156 hours</b> of work</div>
       <div class="row2">
         <div><b class="num" id="halfOut">$1,560</b><span>kept per year at half</span></div>
-        <div><b class="num" id="halfHrs">104 hrs</b><span>of your life back</span></div>
+        <div><b class="num" id="halfHrs">78 hrs</b><span>of your life back</span></div>
       </div>
     </div>
   </div>
@@ -376,12 +438,13 @@ Keep me honest.</div></div>
   <p class="kicker rv">Questions</p>
   <h2 class="rv">Straight answers.</h2>
   <div class="faq">
-    <details class="rv"><summary>Does it connect to my bank?</summary><p>No. You type each buy in yourself, which takes a few seconds. That's on purpose: no bank login, no account, and cash buys count just like card buys.</p></details>
+    <details class="rv"><summary>Does it connect to my bank?</summary><p>No, and you never log in to your bank through it. You log buys yourself in a few seconds, and cash counts just like card. If you want, you can also open a statement file you downloaded from your bank (CSV or PDF). The app finds your habit buys right on your phone. Nothing is uploaded.</p></details>
     <details class="rv"><summary>Where is my data stored?</summary><p>On your phone, in your browser. Nothing goes to a server. The app confirms every save, and you can download a backup file anytime to protect your history or move it to a new phone.</p></details>
     <details class="rv"><summary>What happens if I go over my limit?</summary><p>The app shows you, and the card turns red. At the end of the block, the limit still drops to the next level. No repeats, no second chances. That's the "no excuses" part.</p></details>
     <details class="rv"><summary>What about holidays and breaks?</summary><p>You get one skip per four-week block. A skipped week doesn't count toward anything, and the block runs one week longer so your numbers stay honest.</p></details>
     <details class="rv"><summary>Does it work without signal?</summary><p>Yes, once you've opened it once with a connection. After that it loads from your phone, and everything you log saves right on the device.</p></details>
     <details class="rv"><summary>What if I log the wrong amount?</summary><p>Tap Undo in the bar that pops up after you save. Later on, open History and delete it with the trash button, then log it again.</p></details>
+    <details class="rv"><summary>Can I track more than two habits?</summary><p>Yes, up to five. Add, rename or delete them on the Habits tab. A habit you add later gets its own four measuring weeks before its limit starts, so its number is honest too.</p></details>
     <details class="rv"><summary>Can I try it before I start?</summary><p>Yes. Tap “Try the demo” and you get a sample plan already in week 7, with limits, buys left, a streak and the resist button, all working. When you're ready, tap “Start for real” and the sample data is cleared.</p></details>
     <details class="rv"><summary>Does it cost anything?</summary><p>No. It's free, with no ads, no sign-up and no paid tier.</p></details>
     <details class="rv"><summary>Do I need to download it from an app store?</summary><p>No. It runs in your phone's browser. Open it, then tap Share → Add to Home Screen and it sits on your phone like any other app.</p></details>
@@ -391,7 +454,7 @@ Keep me honest.</div></div>
 <!-- FINAL -->
 <section class="final" style="padding-top:40px"><div class="wrap">
   <h2 class="rv">Start with the last one you bought.</h2>
-  <p class="sub rv">Open the app, name your two habits, and pick Monday. It takes a minute.</p>
+  <p class="sub rv">Open the app, name your habits, and pick Monday. It takes a minute.</p>
   <a class="cta rv" href="../app/index.html">Start your plan
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   <p class="rv" style="margin-top:16px"><a class="ghost" href="../app/?demo=1" style="padding:8px">Or try the demo with sample data first</a></p>
@@ -444,6 +507,28 @@ Keep me honest.</div></div>
       if (left <= 0) { clearInterval(timer); timer = null; kept += 21; dc.textContent = '✓'; dm.textContent = 'You held off. +$21 not spent · $' + kept + ' this session'; db.textContent = '✋ Try again'; }
     }, 50);
   };
+
+
+  // ad video: play muted when on screen, pause when not; sound and play are the viewer's choice
+  (function () {
+    var v = document.getElementById('adVid'), pb = document.getElementById('vidPlay'), sb = document.getElementById('vidSnd');
+    if (!v) return;
+    var userPaused = false;
+    function ui() { pb.textContent = v.paused ? '▶ Play' : '❚❚ Pause'; sb.textContent = v.muted ? '🔇 Sound off' : '🔊 Sound on'; }
+    v.addEventListener('play', ui); v.addEventListener('pause', ui); v.addEventListener('volumechange', ui);
+    pb.onclick = function () { if (v.paused) { userPaused = false; v.play().catch(function () {}); } else { userPaused = true; v.pause(); } };
+    sb.onclick = function () { v.muted = !v.muted; if (!v.muted && v.paused) { userPaused = false; v.play().catch(function () {}); } };
+    v.onclick = function () { pb.onclick(); };
+    if ('IntersectionObserver' in window && !reduce) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting && e.intersectionRatio > 0.5) { if (!userPaused) v.play().catch(function () {}); }
+          else if (!v.paused) v.pause();
+        });
+      }, { threshold: [0, 0.5, 1] }).observe(v);
+    }
+    ui();
+  })();
 
   // calculator
   function fmt(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }

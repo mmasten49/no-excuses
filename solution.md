@@ -18,7 +18,8 @@
 ## The screens
 
 ### Navigation (on every screen after Setup)
-- **Bottom tab bar:** **Home · History · Plan.** Tap any tab to switch. The current tab is red.
+- **Bottom tab bar:** **Home · History · Habits · Plan.** Tap any tab to switch. The current tab is red.
+- **"⚙️ Add, change or import habits"** links on Home and Plan jump straight to the Habits tab.
 - **Saved pill** in the top right corner: "✓ Saved 4:40 PM," showing the time of the last save. It turns red and says "Not saving" if the browser refuses to store data. Tap it to jump to "Your data" on Plan.
 
 ### 1. Setup (first open only)
@@ -73,7 +74,30 @@
   There are no accounts, nothing is sent to a server, and you pick who gets it.
 - **Purchases:** that week's purchases, newest first, each with category, amount, and day/time, plus a trash button. Tapping trash asks "Delete this?" first. There's no edit. Delete it and log it again.
 
-### 5. Plan
+### 5. Habits (new tab)
+- **Your habits:** one card per habit, with its emoji, its name, and its status ("90% limit · $54/week" or "Measuring · week 2 of 4 · $30 so far"). Each card has **Edit** and **✕** (delete).
+  - **Edit:** name, emoji, and **statement words**, the comma-separated words that mark a statement line as this habit. They're pre-filled from the name. For example, Pizza → pizza, domino, papa john, larosa… and Cash → atm, withdrawal.
+  - **✕ Delete:** confirms first and says how many logged buys go with it. Other habits aren't touched. The last habit can't be deleted.
+- **+ Add a habit** (up to 5 total): name and emoji. The emoji is guessed from the name as you type (Coffee → ☕) until you pick one. **A habit added after the plan starts joins this week and gets its own 4 measuring weeks** (this week counts as week 1). Then its limit starts at 90% and drops every 4 of its own counted weeks. Buys logged for it before it joined don't count.
+- **Your why:** edit it here.
+- **Import a statement:**
+  - **Choose a statement file** (CSV, TXT or PDF) or **Paste transactions.**
+  - Everything is read on the phone. Nothing is uploaded. PDFs use pdf.js, a free library loaded from cdnjs only when a PDF is opened. CSV works offline.
+  - **The parser handles:**
+    - CSVs with an Amount column, either sign convention (Chase: purchases negative; Amex/Discover: purchases positive)
+    - Debit/Credit columns (Capital One)
+    - files with no header row
+    - pasted or PDF text with one transaction per line: a date first (11/03, 11/03/2026, 2026-11-03, Nov 3), an optional second posting date, and the first money value after the description (a later value is treated as a running balance)
+  - **It drops:** payments, refunds, transfers, deposits and payroll. Repeated identical lines are kept as separate buys.
+  - **The results sheet, "Where your money went":**
+    - totals for all card buys and for buys on your habits (with the percentage)
+    - per habit: matched buys, total, **about $X/week on this statement** next to your own logged pace, and a checkbox list of the buys
+    - **Where the rest went:** the top 8 unmatched merchants, each with a "Count as [habit]" picker that adds that merchant to the habit's statement words and re-sorts on the spot
+  - **"Add N buys to my log"** adds the checked, matched buys dated by the statement. It skips duplicates (from earlier imports), anything before the plan started, and anything before that habit joined, and the sheet says how many were skipped and why.
+  - **Undo:** the last 3 imports are listed with **Undo**, which removes only that import's buys.
+  - **Cash note:** cash buys never appear on card statements, but ATM withdrawals do and match a cash habit.
+
+### 6. Plan
 - **The ladder:** blocks 1–6 (more if you're past 6), each with its percentage, its weekly limit for each category, and a status: **NOW**, **DONE**, or a ✓/✗ for each category in finished blocks. It also notes when a block's skip was used.
 - **Starting numbers:** the block-1 total for each category (marked "so far" during block 1), plus your best streak and money kept.
 - **At this pace:** for each habit, the yearly cost based on the last 4 finished, non-skipped weeks × 52, next to "was $X" (your old pace, starting number ÷ 4 × 52) and, if pay is set, the hours of work.
@@ -102,7 +126,8 @@
 ### Installing and offline use
 - **Add to Home Screen** gives a real app icon (a red "NE." square) and opens full screen, with no browser bars.
 - **Works offline after the first visit.** A service worker keeps a copy of the app. It always tries the network first, so updates show up when you're online, and falls back to the saved copy when there's no signal.
-- **The Plan tab's habits card** shows the two habits and your why. **Edit habits & why** changes the names, the emoji and the why.
+- **Habits, names, emoji, why and statement words** are all managed on the **Habits** tab.
+- **The Plan tab** has a habit picker (chips) above the ladder, because each habit has its own ladder and schedule. It also shows starting numbers ("—" while measuring), yearly pace and cost in hours for every habit.
 
 ## How the numbers work
 - **Week:** Monday 8:00 AM to the next Monday 8:00 AM.
@@ -117,11 +142,13 @@
 - **Purchases left:** dollars left this week ÷ that category's average purchase amount (all purchases logged so far), rounded down. Never below 0.
 
 ## What it does not do
-- **No reading of screenshots or receipts.** You type the amount.
-- **No connection to a bank or card.** It never sees your accounts.
+- **No reading of screenshots or receipts.** You type the amount, or import a CSV/PDF statement file.
+- **No connection to a bank or card.** No bank login, no syncing. A statement file you choose to open is read on the phone and nothing is uploaded or stored except the buys you choose to add.
 - **No logins or accounts, and no cloud.** Data stays in the phone's browser.
 - **No in-app sharing network.** No friends list, no partner accounts, no leaderboards. Accountability is only the text report you send yourself through the phone's share sheet.
-- **Exactly two habits.** You can't add a third or remove one. You *can* rename them and change their emoji in Plan › Rename habits, and history and limits stay the same.
+- **No more than 5 habits, and never zero.** Renaming doesn't change history or limits. Deleting removes that habit's buys.
+- **No per-habit skips.** A skipped week is skipped for every habit (1 per plan block).
+- **No auto-categorizing beyond statement words.** No AI guessing. A line matches a habit only if it contains one of that habit's words.
 - **No push notifications, reminders or alarms.** The resist countdown only shows inside the app.
 - **No "danger time" or time-of-day patterns.** People often log a buy after the fact, so the logged time isn't reliable enough to find patterns in.
 - **No auto-sending.** The accountability text only goes out when you tap Send and pick the person yourself.
