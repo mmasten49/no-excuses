@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>No Excuses · Weekly report card</title>
+<meta name="description" content="A weekly report card from No Excuses.">
+<meta name="theme-color" content="#FAF7F2">
+<link rel="icon" type="image/png" href="../app/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #FAF7F2; --ink: #1A1A1A; --muted: #6B6560; --line: #ECE6DE; --card: #fff; --red: #D7392B; --red-soft: #FBE9E7; --green: #1F8A4C; --green-soft: #E5F4EA;
+    --shadow: 0 1px 2px rgba(26,26,26,.04), 0 10px 28px rgba(26,26,26,.08); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 24px 16px 48px; }
+  .brand { font-weight: 900; font-size: 18px; letter-spacing: -0.03em; text-decoration: none; color: var(--ink); }
+  .brand i { color: var(--red); font-style: normal; }
+  .demo { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 800; background: #FFF4D6; color: #6B4E00; border: 1px solid #F1D48A; padding: 3px 8px; border-radius: 999px; vertical-align: 2px; }
+  .kicker { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--red); margin: 26px 0 6px; }
+  h1 { font-size: 34px; line-height: 1.02; letter-spacing: -0.045em; font-weight: 900; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 15px; }
+  .card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 12px; }
+  .habit { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .habit:last-child { border-bottom: 0; }
+  .habit .name { font-weight: 800; font-size: 17px; }
+  .habit .amt { font-weight: 900; font-size: 17px; font-variant-numeric: tabular-nums; }
+  .habit .amt span { color: var(--muted); font-weight: 600; font-size: 14px; }
+  .bar { grid-column: 1 / -1; height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar span { display: block; height: 100%; border-radius: 99px; background: var(--ink); }
+  .bar span.over { background: var(--red); } .bar span.goal { background: var(--green); }
+  .verdict { grid-column: 1 / -1; font-size: 13px; font-weight: 800; }
+  .verdict.ok { color: var(--green); } .verdict.no { color: var(--red); } .verdict.m { color: var(--muted); font-weight: 700; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+  .stat { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 12px; }
+  .stat .k { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  .stat .v { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .stat .v.good { color: var(--green); } .stat .v.bad { color: var(--red); }
+  .goal .top { display: flex; justify-content: space-between; gap: 10px; font-weight: 800; margin-bottom: 8px; }
+  .why { text-align: center; font-size: 15px; color: var(--muted); margin: 16px 0 6px; }
+  .why b { color: var(--ink); }
+  .ask { text-align: center; font-size: 22px; font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 18px; }
+  .cta { display: block; text-align: center; background: var(--red); color: #fff; text-decoration: none; font-weight: 800; font-size: 17px; padding: 16px; border-radius: 16px; box-shadow: 0 8px 22px rgba(215,57,43,.28); }
+  .cta2 { display: block; text-align: center; margin-top: 10px; color: var(--ink); font-weight: 700; font-size: 15px; }
+  .fine { text-align: center; font-size: 12px; color: var(--muted); margin-top: 20px; line-height: 1.5; }
+  .err { text-align: center; padding: 40px 0; }
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+  <a class="brand" href="./">No Excuses<i>.</i></a>
+  <noscript><p>This report card needs JavaScript to show.</p></noscript>
+</div>
+<script src="../app/logic.js"></script>
+<script>
+(function () {
+  'use strict';
+  var root = document.getElementById('root');
+  // Every value from the link is shown with textContent, never as HTML.
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+  function money(n) { var v = Math.round(n * 100) / 100, p = Math.abs(v).toFixed(2).split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); return (v < 0 ? '-$' : '$') + (p[1] === '00' ? p[0] : p.join('.')); }
+  function bar(frac, cls) { var b = el('div', 'bar'), s = el('span', cls || ''); s.style.width = Math.max(0, Math.min(100, Math.round(frac * 100))) + '%'; b.appendChild(s); return b; }
+
+  var data = window.NoExcuses && location.hash.length > 1 ? window.NoExcuses.decodeCard(location.hash.slice(1)) : null;
+  if (!data) {
+    var e = el('div', 'err');
+    e.appendChild(el('h1', '', 'This link is incomplete.'));
+    e.appendChild(el('p', 'sub', 'The report card couldn\'t be read. Ask the sender to tap Send again.'));
+    var a = el('a', 'cta', 'What is No Excuses?'); a.href = './'; e.appendChild(a);
+    root.appendChild(e);
+    return;
+  }
+
+  var brand = root.querySelector('.brand');
+  if (data.demo) brand.after(el('span', 'demo', 'DEMO · sample data'));
+
+  var ws = new Date(data.weekStart);
+  var label = data.current ? 'This week so far' : 'Week of ' + ws.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  root.appendChild(el('p', 'kicker', 'Weekly report card'));
+  root.appendChild(el('h1', '', label));
+  root.appendChild(el('p', 'sub', 'Plan week ' + data.planWeek + (data.skipped ? ' · skipped (break week)' : '') + ' · logged by the sender'));
+
+  if (!data.skipped && data.habits.length) {
+    var c = el('div', 'card');
+    data.habits.forEach(function (h) {
+      var row = el('div', 'habit');
+      row.appendChild(el('div', 'name', (h.emoji ? h.emoji + ' ' : '') + h.name));
+      var amt = el('div', 'amt', money(h.spent));
+      if (h.limit !== null) amt.appendChild(el('span', '', ' of ' + money(h.limit)));
+      row.appendChild(amt);
+      if (h.limit !== null) {
+        var under = h.spent <= h.limit + 0.005;
+        row.appendChild(bar(h.limit > 0 ? h.spent / h.limit : (h.spent > 0 ? 1 : 0), under ? '' : 'over'));
+        row.appendChild(el('div', 'verdict ' + (under ? 'ok' : 'no'),
+          (under ? (data.current ? '✅ On track' : '✅ Under the limit') : '❌ Over by ' + money(h.spent - h.limit)) + (h.pct ? ' · ' + h.pct + '% limit' : '')));
+      } else row.appendChild(el('div', 'verdict m', 'Measuring: no limit yet'));
+      c.appendChild(row);
+    });
+    root.appendChild(c);
+  }
+
+  var stats = el('div', 'stats');
+  [['🔥 Streak', data.streak + ' wk' + (data.streak === 1 ? '' : 's'), ''],
+   ['💰 Kept', money(data.kept), data.judged ? (data.kept >= 0 ? 'good' : 'bad') : ''],
+   ['✋ Resisted', data.resisted + (data.resisted === 1 ? ' time' : ' times'), '']].forEach(function (s) {
+    var b = el('div', 'stat'); b.appendChild(el('div', 'k', s[0])); b.appendChild(el('div', 'v ' + s[2], s[1])); stats.appendChild(b);
+  });
+  root.appendChild(stats);
+
+  if (data.goal && data.goal.target > 0) {
+    var g = el('div', 'card goal'), top = el('div', 'top');
+    top.appendChild(el('span', '', '🎯 ' + (data.why || 'Goal')));
+    top.appendChild(el('span', '', money(data.goal.saved) + ' of ' + money(data.goal.target)));
+    g.appendChild(top); g.appendChild(bar(data.goal.saved / data.goal.target, 'goal'));
+    root.appendChild(g);
+  } else if (data.why) {
+    var w = el('p', 'why'); w.appendChild(document.createTextNode('Saving for: ')); w.appendChild(el('b', '', data.why)); root.appendChild(w);
+  }
+
+  root.appendChild(el('p', 'ask', 'Keep them honest. 👊'));
+  var cta = el('a', 'cta', 'Cut your own habit spending'); cta.href = './'; root.appendChild(cta);
+  var demo = el('a', 'cta2', 'Or try the demo'); demo.href = '../app/?demo=1'; root.appendChild(demo);
+  root.appendChild(el('p', 'fine', 'Numbers are logged by the sender and aren\'t verified by anyone. This page was built from the link itself. Nothing was sent to a server, and no purchase list is included.'));
+  document.title = 'No Excuses · ' + label;
+})();
+</script>
+</body>
+</html>

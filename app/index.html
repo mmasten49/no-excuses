@@ -221,6 +221,18 @@
   .demobar { max-width: 480px; margin: 8px auto 0; display: flex; justify-content: space-between; align-items: center; gap: 10px;
     background: #FFF4D6; border: 1px solid #F1D48A; color: #6B4E00; border-radius: 12px; padding: 7px 8px 7px 12px; font-size: 13px; }
   .demobar button { background: var(--ink); color: #fff; font-weight: 800; font-size: 12px; padding: 7px 11px; border-radius: 9px; }
+  .srcbar { display: flex; gap: 10px; align-items: flex-start; background: var(--ink); color: #fff; border-radius: 14px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; }
+  .srcbar b { display: block; font-size: 14px; } .srcbar span { opacity: .9; }
+  .goalbar { display: block; width: 100%; text-align: left; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 12px 16px; margin-bottom: 12px; }
+  .goalbar .gtop { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .goalbar .gtop .muted { font-weight: 600; }
+  .goalbar .bar { display: block; height: 8px; }
+  .goalbar .bar span { background: var(--green); } .goalbar .bar span.done { background: var(--red); }
+  .bbtns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .banner.share { align-items: flex-start; }
+  .howto { padding-left: 20px; margin: 0 0 12px; display: grid; gap: 8px; font-size: 14px; line-height: 1.45; }
+  .copyrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
+  .copyrow code { font-size: 11px; font-weight: 600; word-break: break-all; color: var(--muted); }
   .hidden { display: none !important; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   /* ---------- multi-habit + habits tab + import ---------- */
@@ -335,6 +347,9 @@
   // ?demo=1 (from the landing page's "Try the demo") loads sample data, but never over a real plan.
   var wantsDemo = /[?&]demo=1\b/.test(location.search);
   if (wantsDemo && !state) { state = NE.makeDemo(Date.now()); state.savedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { storageOK = false; } }
+  // Quick-log link (Apple Pay automation, Back Tap, NFC): opens a pre-filled log sheet. It never saves on its own.
+  var quickLog = state ? NE.parseQuickLog(location.search, state) : null;
+  if (location.search && history.replaceState) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }   // a reload won't re-open it
 
   // ================= helpers =================
   function money(n) {
@@ -376,15 +391,20 @@
     if (res.count) lines.push('✋ Resisted ' + res.count + (res.count === 1 ? ' time' : ' times') + ' (' + money(res.value) + ' not spent)');
     if (st.weeksJudged) lines.push('🔥 Streak: ' + st.streak + ' wk' + (st.streak === 1 ? '' : 's') + ' · 💰 Kept ' + money(st.kept));
     if (state.why) lines.push('Why: ' + state.why);
+    if (state.goal && state.goal.target > 0) { var gs = NE.goalSaved(state); lines.push('🎯 ' + (state.why || 'Goal') + ': ' + money(gs) + ' of ' + money(state.goal.target) + ' (' + Math.min(100, Math.round(gs / state.goal.target * 100)) + '%)'); }
     lines.push('Keep me honest.');
     return lines.join('\n');
   }
+  // The report card: a link to a one-page card, with the week's numbers packed after "#" (never sent to a server).
+  function cardUrl(k) { return new URL('../web/card.html', location.href).href.split('#')[0] + '#' + NE.encodeCard(NE.cardData(state, k, Date.now())); }
   function shareWeek(k) {
-    var text = weekText(k), ws = NE.weekStart(state.startTs, k);
+    var url = cardUrl(k), ws = NE.weekStart(state.startTs, k), text = weekText(k);
+    var short = 'My No Excuses week' + (state.why ? ' (' + state.why + ')' : '') + '. Keep me honest:';
     var done = function (msg) { markShared(ws); flash(msg, 'Accountability on'); render(); };
-    if (navigator.share) navigator.share({ text: text }).then(function () { done('Sent'); }).catch(function () {});
-    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { done('Copied'); }, function () { modal('<h3>Copy this</h3><pre class="sharetext">' + esc(text) + '</pre>', null, null, 'Done'); });
-    else modal('<h3>Copy this</h3><pre class="sharetext">' + esc(text) + '</pre>', null, null, 'Done');
+    var fallback = function () { modal('<h3>Copy this</h3><pre class="sharetext">' + esc(text + String.fromCharCode(10) + url) + '</pre>', null, null, 'Done'); };
+    if (navigator.share) navigator.share({ title: 'My No Excuses week', text: short, url: url }).then(function () { done('Sent'); }).catch(function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(short + ' ' + url).then(function () { done('Link copied'); }, fallback);
+    else fallback();
   }
 
   // ================= nav =================
@@ -602,12 +622,30 @@
         (state.why ? '<span class="why">Remember: ' + esc(state.why) + '</span>' : '') + '</div>' +
         '<button class="mini" id="caved">I caved</button></div>';
     }
-    var prevK = r.week.k - 1;
+    // One "new week" banner (Mon–Tue), never a stack: offers to move last week's money kept into the goal jar and/or send the report card.
+    var prevK = r.week.k - 1, sug = null;
     if (prevK >= 0 && now - r.weekStart < 2 * 864e5) {
       var pw = NE.weekSummary(state, prevK, now);
-      if (!pw.skipped && (state.sharedWeeks || []).indexOf(pw.start) === -1)
-        banners += '<div class="banner share"><div><b>📲 New week</b><span>Send last week\'s numbers to the person who keeps you honest.</span></div>' +
-          '<button class="mini red" id="shareLast">Send</button><button class="mini" id="dismissShare" aria-label="Not now">✕</button></div>';
+      if (!pw.skipped) {
+        var canShare = (state.sharedWeeks || []).indexOf(pw.start) === -1;
+        var g = state.goal || {};
+        sug = NE.suggestMove(state, now);
+        var canMove = g.target > 0 && sug.amount >= 1 && (g.asked || []).indexOf(pw.start) === -1;
+        if (canShare || canMove) {
+          banners += '<div class="banner share"><div><b>📅 New week' + (sug.amount >= 1 ? '. You kept ' + money(sug.amount) + ' last week.' : '') + '</b>' +
+            '<span>' + (canMove ? 'Move it to your ' + (state.why ? esc(state.why) : 'goal') + ' so it really counts.' : 'Send last week to the person who keeps you honest.') + '</span>' +
+            '<div class="bbtns">' + (canMove ? '<button class="mini red" id="moveLast">💰 Move ' + money(sug.amount) + '</button>' : '') +
+            (canShare ? '<button class="mini' + (canMove ? '' : ' red') + '" id="shareLast">📲 Send</button>' : '') + '</div></div>' +
+            '<button class="mini" id="dismissShare" aria-label="Not now">✕</button></div>';
+        }
+      }
+    }
+    // Goal jar: one slim bar, only when a goal amount is set.
+    var goalBar = '';
+    if (state.goal && state.goal.target > 0) {
+      var saved = NE.goalSaved(state), gp = Math.min(100, Math.round(saved / state.goal.target * 100));
+      goalBar = '<button class="goalbar" id="openGoal"><span class="gtop"><span>🎯 ' + (state.why ? esc(state.why) : 'Your goal') + '</span><b class="num">' + money(saved) + ' <span class="muted">of ' + money(state.goal.target) + '</span></b></span>' +
+        '<span class="bar"><span class="' + (gp >= 100 ? 'done' : '') + '" data-w="' + gp + '%" style="width:0"></span></span></button>';
     }
 
     var weekRes = NE.resistStats(state, r.weekStart, r.weekEnd);
@@ -625,7 +663,7 @@
     else if (r.canSkip) skip = '<div class="skiprow">Break week? <button class="textbtn" id="skip">Skip this week</button> · 1 skip left this block</div>';
     else skip = '<div class="skiprow">' + (r.skipUsedThisBlock ? 'Skip used this block' : 'Skip only works before your first log of the week') + '</div>';
 
-    app.innerHTML = '<div class="view">' + head + banners + cards + chips + (r.skipped ? '' : resistChip) + buttons + skip +
+    app.innerHTML = '<div class="view">' + head + banners + goalBar + cards + chips + (r.skipped ? '' : resistChip) + buttons + skip +
       '<div class="manage"><button class="textbtn" id="toHabits">⚙️ Add, change or import habits</button></div></div>';
     animateRings();
 
@@ -652,7 +690,13 @@
       openSheet(pending.cat); amountStr = String(pending.amount); renderSheet(); render();
     };
     if ($('shareLast')) $('shareLast').onclick = function () { shareWeek(prevK); };
-    if ($('dismissShare')) $('dismissShare').onclick = function () { markShared(NE.weekStart(state.startTs, prevK)); render(); };
+    if ($('moveLast')) $('moveLast').onclick = function () { confirmMove(sug.amount, sug.weekStart); };
+    if ($('dismissShare')) $('dismissShare').onclick = function () {
+      var ws = NE.weekStart(state.startTs, prevK);
+      state.goal = state.goal || {}; state.goal.asked = (state.goal.asked || []).concat([ws]);
+      markShared(ws); render();
+    };
+    if ($('openGoal')) $('openGoal').onclick = openGoal;
 
     app.querySelectorAll('[data-log]').forEach(function (b) { b.onclick = function () { buzz(); openSheet(b.getAttribute('data-log')); }; });
     if ($('skip')) $('skip').onclick = function () {
@@ -665,6 +709,46 @@
     state.seen = state.seen || {};
     var due = ord.filter(function (c) { var i = r.cats[c]; return i.report && i.block > (state.seen[c] || 1); });
     if (due.length && $('modal').classList.contains('hidden')) showReport(r, due);
+  }
+
+  // ---- goal jar ----
+  function addMove(amount, weekStartTs) {
+    var g = state.goal = state.goal || { moves: [], asked: [] };
+    g.moves = g.moves || []; g.asked = g.asked || [];
+    var before = NE.goalSaved(state);
+    g.moves.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 6), amount: Math.round(amount * 100) / 100, ts: Date.now() });
+    if (weekStartTs && g.asked.indexOf(weekStartTs) === -1) g.asked.push(weekStartTs);
+    save(); buzz([15, 40, 15]);
+    var after = NE.goalSaved(state);
+    if (g.target > 0 && before < g.target && after >= g.target) {
+      modal('<div style="text-align:center;font-size:54px">🎯</div><h3 style="text-align:center">Goal hit.</h3><p class="muted" style="text-align:center">' + money(after) + ' moved to ' + (state.why ? esc(state.why) : 'your goal') + '. That\'s money you used to spend without noticing.</p>', null, null, 'Set a new goal', function () { go('habits'); });
+    } else flash('Moved ' + money(amount), money(after) + (g.target > 0 ? ' of ' + money(g.target) : ' saved'));
+    render();
+  }
+  function confirmMove(amount, weekStartTs) {
+    modal('<h3>Move ' + money(amount) + '?</h3><p class="muted">Open your bank app and move ' + money(amount) + ' to savings (or wherever ' + (state.why ? esc(state.why) : 'your goal') + ' lives). Then tap <b>I moved it</b>. Only money you actually move fills the jar.</p>',
+      'I moved it', function () { addMove(amount, weekStartTs); });
+  }
+  function openGoal() {
+    var g = state.goal || {}, saved = NE.goalSaved(state), moves = (g.moves || []).slice(-5).reverse();
+    $('modalBody').innerHTML = '<h3>🎯 ' + (state.why ? esc(state.why) : 'Your goal') + '</h3>' +
+      '<p class="muted" style="margin-top:0">' + money(saved) + (g.target > 0 ? ' of ' + money(g.target) + ' · ' + Math.min(100, Math.round(saved / g.target * 100)) + '%' : '') + '. Only money you actually moved counts. The app can\'t see your bank, so it never guesses.</p>' +
+      '<div class="wage"><b style="font-size:20px">$</b><input id="moveAmt" type="number" inputmode="decimal" min="0" step="1" placeholder="20"><button class="btn btn-red" id="moveAdd" style="width:auto;padding:12px 16px">I moved it</button></div>' +
+      (moves.length ? '<h2 style="margin-top:18px">Recent moves</h2>' + moves.map(function (m) {
+        return '<div class="kv"><span>' + wd(m.ts) + '</span><span><b class="num">' + money(m.amount) + '</b> <button class="iconbtn danger" data-unmove="' + esc(m.id) + '" aria-label="Remove">✕</button></span></div>';
+      }).join('') : '') +
+      '<div class="actions" style="grid-template-columns:1fr 1fr"><button class="btn btn-ghost" id="gEdit">Change goal</button><button class="btn btn-ink" id="gClose">Done</button></div>';
+    $('modal').classList.remove('hidden');
+    $('gClose').onclick = closeModal;
+    $('gEdit').onclick = function () { closeModal(); go('habits'); setTimeout(function () { var el = $('goalIn'); el && el.focus(); }, 80); };
+    $('moveAdd').onclick = function () {
+      var v = Math.round(parseFloat($('moveAmt').value) * 100) / 100;
+      if (!(v > 0 && v < 100000)) { $('moveAmt').focus(); return; }
+      closeModal(); addMove(v, null);
+    };
+    $('modalBody').querySelectorAll('[data-unmove]').forEach(function (b) {
+      b.onclick = function () { var id = b.getAttribute('data-unmove'); g.moves = g.moves.filter(function (m) { return m.id !== id; }); save(); openGoal(); render(); };
+    });
   }
 
   function showReport(r, due) {
@@ -686,14 +770,14 @@
   }
 
   // ================= LOG SHEET =================
-  var sheetCat = 'a', amountStr = '';
-  function openSheet(cat) {
-    sheetCat = cat; amountStr = '';
+  var sheetCat = 'a', amountStr = '', sheetSrc = null;   // sheetSrc = { merchant, matched } when opened from a quick-log link
+  function openSheet(cat, src) {
+    sheetCat = cat; amountStr = ''; sheetSrc = src || null;
     renderSheet();
     $('sheet').setAttribute('aria-label', 'Log a purchase');
     $('scrim').classList.add('open'); $('sheet').classList.add('open');
   }
-  function closeSheet() { $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); }
+  function closeSheet() { $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); sheetSrc = null; }
   $('scrim').onclick = closeSheet;
 
   function renderSheet() {
@@ -710,11 +794,17 @@
       }
     }
     var keys = ['1','2','3','4','5','6','7','8','9','.','0','del'];
+    var goalPct = state.goal && state.goal.target > 0 && amt > 0 ? Math.max(1, Math.round(amt / state.goal.target * 100)) : 0;
+    var extra = [];
+    if (amt > 0 && state.wage > 0) extra.push('= ' + NE.workTime(amt, state.wage) + ' of work');
+    if (goalPct) extra.push(goalPct + '% of your ' + (state.why ? esc(state.why) : 'goal'));
     $('sheetBody').innerHTML = '<div class="grab"></div>' +
+      (sheetSrc ? '<div class="srcbar">⚡ <span><b>From a quick-log link' + (sheetSrc.merchant ? ': ' + esc(sheetSrc.merchant) : '') + '</b>' +
+        (sheetSrc.merchant && !sheetSrc.matched ? 'Couldn\'t tell which habit. Pick one below.' : 'Check it, then tap Save. Nothing is saved until you do.') + '</span></div>' : '') +
       '<div class="seg">' + order().map(function (c) { return '<button data-cat="' + c + '" class="' + (c === sheetCat ? 'on' : '') + '">' + E(c) + ' ' + L(c) + '</button>'; }).join('') + '</div>' +
       '<div class="amount num"><small>$</small>' + esc(amountStr || '0') + '</div>' +
       '<div class="preview' + (ok ? ' ok' : '') + '">' + esc(preview) + '</div>' +
-      (amt > 0 && state.wage > 0 ? '<div class="worktime">= ' + NE.workTime(amt, state.wage) + ' of work</div>' : '') +
+      (extra.length ? '<div class="worktime">' + extra.join(' · ') + '</div>' : '') +
       '<div class="quick">' + NE.quickAmounts(state, sheetCat).map(function (q) { return '<button data-q="' + q + '">' + money(q) + '</button>'; }).join('') + '</div>' +
       '<div class="keypad">' + keys.map(function (k) { return '<button data-k="' + k + '" aria-label="' + (k === 'del' ? 'Delete' : k) + '">' + (k === 'del' ? ICON.back : k) + '</button>'; }).join('') + '</div>' +
       '<div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Cancel</button><button class="btn btn-red" id="saveBtn"' + (amt > 0 ? '' : ' disabled') + '>Save ' + (amt > 0 ? money(amt) : '') + '</button></div>';
@@ -740,7 +830,9 @@
       var a = Math.round((parseFloat(amountStr) || 0) * 100) / 100;
       if (!(a > 0)) return;
       var newId = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-      state.purchases.push({ id: newId, cat: sheetCat, amount: a, ts: Date.now() });
+      var buy = { id: newId, cat: sheetCat, amount: a, ts: Date.now() };
+      if (sheetSrc) { buy.src = 'quicklog'; if (sheetSrc.merchant) buy.desc = sheetSrc.merchant; }
+      state.purchases.push(buy);
       var lostIds = [];
       (state.resists || []).forEach(function (x) { if (x.status === 'pending' && x.cat === sheetCat) { x.status = 'lost'; lostIds.push(x.id); } });
       save(); closeSheet(); buzz([15, 40, 15]);
@@ -792,7 +884,7 @@
 
     var items = w.purchases.length ? '<ul class="list">' + w.purchases.map(function (p) {
       var known = !!state.habits[p.cat];
-      return '<li><div class="dot" style="background:' + tint(p.cat) + '">' + E(p.cat) + '</div><div class="what"><b>' + (known ? L(p.cat) : 'Deleted habit') + '</b><span>' + wd(p.ts) + (p.src === 'import' ? ' · 📄 ' + esc(p.desc || 'Imported') : ' · ' + tm(p.ts)) + '</span></div>' +
+      return '<li><div class="dot" style="background:' + tint(p.cat) + '">' + E(p.cat) + '</div><div class="what"><b>' + (known ? L(p.cat) : 'Deleted habit') + '</b><span>' + wd(p.ts) + (p.src === 'import' ? ' · 📄 ' + esc(p.desc || 'Imported') : ' · ' + tm(p.ts) + (p.src === 'quicklog' && p.desc ? ' · ⚡ ' + esc(p.desc) : '')) + '</span></div>' +
         '<div class="amt num">' + money(p.amount) + '</div><button class="del" data-del="' + esc(p.id) + '" aria-label="Delete">' + ICON.trash + '</button></li>';
     }).join('') + '</ul>' : '<div class="empty">' + (w.skipped ? 'Nothing logged.' : 'Nothing logged this week.') + '</div>';
 
@@ -854,7 +946,13 @@
       '<p class="muted" style="margin-top:0">Track 1 to ' + NE.MAX_HABITS + '. A habit you add later gets its own 4 measuring weeks, then its own limit, on its own schedule.</p>' +
       list +
       (ord.length < NE.MAX_HABITS ? '<button class="btn btn-red" id="addHabit">' + ICON.plus + 'Add a habit</button>' : '<p class="small muted" style="text-align:center">That\'s the max of ' + NE.MAX_HABITS + '. Delete one to add another.</p>') +
-      '<h2>Your why</h2><div class="card"><input class="hname" id="whyIn" maxlength="40" placeholder="e.g. Spring break fund" value="' + esc(state.why || '') + '" style="font-size:17px;margin:0"><p class="small muted" style="margin:8px 0 0">Shows during every resist countdown and in your weekly text.</p></div>' +
+      '<h2>Your why &amp; goal jar</h2><div class="card">' +
+        '<div class="field" style="margin:0"><label for="whyIn">What you\'re saving for</label><input class="hname" id="whyIn" maxlength="40" placeholder="e.g. Spring break fund" value="' + esc(state.why || '') + '" style="font-size:17px;margin:0"></div>' +
+        '<div class="field"><label for="goalIn">Goal amount <span style="text-transform:none;letter-spacing:0;font-weight:600">(optional)</span></label><div class="wage" style="margin:0"><b style="font-size:20px">$</b><input id="goalIn" type="number" inputmode="decimal" min="0" step="10" placeholder="400" value="' + (state.goal && state.goal.target > 0 ? state.goal.target : '') + '"></div></div>' +
+        '<p class="small muted" style="margin:8px 0 0">Your why shows during every resist countdown and in your weekly report. With a goal amount, Home gets a jar that fills only with money you actually move to savings. Each Monday it suggests last week\'s money kept.</p></div>' +
+      '<h2>Auto-log</h2><div class="card hcard" style="grid-template-columns:48px 1fr"><div class="em" style="background:var(--bg)">⚡</div>' +
+        '<div><b>Tap to pay, it logs itself</b><span>A free iPhone Shortcut opens No Excuses with each Apple Pay buy filled in. You just tap Save.</span>' +
+        '<button class="btn btn-ghost" id="autoSetup" style="margin-top:10px;padding:12px">Set up auto-log</button></div></div>' +
       '<h2 id="importCard">Import a statement</h2><div class="card">' +
         '<p style="margin:0 0 4px"><b>📄 See where your money actually went.</b></p>' +
         '<p class="muted" style="margin:0">Download a card or bank statement from your bank\'s app or website (<b>CSV works best</b>, PDF works on most), then open it here. No Excuses finds the buys that match your habits, adds them to your log if you want, and shows where the rest went.</p>' +
@@ -879,6 +977,13 @@
       };
     });
     $('whyIn').onchange = function () { state.why = this.value.trim().slice(0, 40); save(); flash('Saved', state.why ? 'Your why is set' : 'Your why is cleared'); };
+    $('goalIn').onchange = function () {
+      var v = Math.round(parseFloat(this.value) * 100) / 100;
+      state.goal = state.goal || { moves: [], asked: [] };
+      state.goal.target = v > 0 && v < 1000000 ? v : null;
+      save(); flash('Saved', state.goal.target ? 'Goal: ' + money(state.goal.target) : 'Goal jar turned off');
+    };
+    $('autoSetup').onclick = openAutoLog;
     $('pickStmt').onclick = function () { $('stmtFile').value = ''; $('stmtFile').click(); };
     $('pasteStmt').onclick = pasteStatement;
     app.querySelectorAll('[data-undoimp]').forEach(function (b) {
@@ -889,6 +994,43 @@
         });
       };
     });
+  }
+
+  // ---- auto-log setup guide (opens in the sheet so the Habits tab stays short) ----
+  function copyText(t, label) {
+    var ok = function () { flash('Copied', label); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function () { showCopy(t); });
+    else showCopy(t);
+  }
+  function showCopy(t) { modal('<h3>Copy this</h3><pre class="sharetext">' + esc(t) + '</pre>', null, null, 'Done'); }
+  function openAutoLog() {
+    var base = new URL('./', location.href).href.split('?')[0];
+    var applePay = base + '?log&amount=AMOUNT&merchant=MERCHANT';
+    $('sheetBody').innerHTML = '<div class="grab"></div><div class="imp">' +
+      '<h3>⚡ Auto-log Apple Pay</h3>' +
+      '<p class="muted" style="margin:0 0 12px">iPhone with iOS 17 or newer, using the free Shortcuts app. When you tap to pay, No Excuses opens with the amount and store filled in. <b>It never saves on its own.</b> You check it and tap Save.</p>' +
+      '<ol class="howto">' +
+        '<li>Open <b>Shortcuts</b> → <b>Automation</b> tab → <b>+</b> → <b>Wallet</b>.</li>' +
+        '<li>Pick your card. Optionally pick stores (Domino\'s, Starbucks…) or leave it on any store. Choose <b>Run Immediately</b>, then <b>Next</b> → <b>New Blank Automation</b>.</li>' +
+        '<li>Add the action <b>URL Encode</b>. Tap its input and choose <b>Shortcut Input → Merchant</b>.</li>' +
+        '<li>Add the action <b>Open URLs</b> and paste the link below. Replace <b>AMOUNT</b> with <b>Shortcut Input → Amount</b>, and <b>MERCHANT</b> with <b>URL Encoded Text</b>.</li>' +
+        '<li>Tap <b>Done</b>. Next time you tap to pay, No Excuses opens with the buy ready. The store name picks the habit using its statement words.</li>' +
+      '</ol>' +
+      '<div class="copyrow"><code>' + esc(applePay) + '</code><button class="iconbtn" id="cpApple">Copy</button></div>' +
+      '<h2 style="margin-top:18px">One-tap log links</h2>' +
+      '<p class="muted" style="margin:0 0 8px">For cash and card swipes: put one of these in a Shortcut and trigger it with <b>Back Tap</b> (Settings → Accessibility → Touch → Back Tap) or an <b>NFC sticker</b>. It opens straight to that habit\'s log sheet.</p>' +
+      order().map(function (c) {
+        return '<div class="copyrow"><span>' + E(c) + ' ' + L(c) + '</span><button class="iconbtn" data-cpq="' + c + '">Copy link</button></div>';
+      }).join('') +
+      '<p class="small muted" style="margin:12px 0 0">Card swipes and cash don\'t trigger Apple Pay automations. Use + or a one-tap link for those. Your statement import later catches anything you missed, and skips buys you already logged.</p>' +
+      '<div class="sticky-actions"><button class="btn btn-ink" id="alDone">Done</button></div></div>';
+    $('sheet').setAttribute('aria-label', 'Auto-log setup');
+    $('scrim').classList.add('open'); $('sheet').classList.add('open');
+    $('cpApple').onclick = function () { copyText(applePay, 'Apple Pay link'); };
+    $('sheetBody').querySelectorAll('[data-cpq]').forEach(function (b) {
+      b.onclick = function () { var c = b.getAttribute('data-cpq'); copyText(base + '?log=' + encodeURIComponent(state.habits[c].name), Lraw(c) + ' link'); };
+    });
+    $('alDone').onclick = closeSheet;
   }
 
   // Add (c = null) or edit a habit.
@@ -1179,6 +1321,10 @@
 
   render();
   if (state) askPersist();
+  if (quickLog && state) {
+    openSheet(quickLog.cat, { merchant: quickLog.merchant, matched: quickLog.matched });
+    if (quickLog.amount) { amountStr = String(quickLog.amount); renderSheet(); }
+  }
   // Offline support: works at the counter even with no signal. Service workers need https (GitHub Pages) or localhost.
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
   function idle() { return state && $('modal').classList.contains('hidden') && !$('sheet').classList.contains('open'); }

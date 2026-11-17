@@ -123,6 +123,51 @@
   - **Logging a ~$19 Pizza buy → "1 Pizza buy left · Last one this week."** That's the classmate test task.
 - **A yellow bar under the header,** "👀 Demo · sample data," shows on every screen with a **Start for real** button. That button asks first, then clears the sample data and goes to setup.
 
+### Auto-log, goal jar, report card (added Nov 17)
+**Quick-log links (auto-log).**
+- `app/?log` opens the log sheet pre-filled:
+  - `?log=Pizza` (a habit name or id) picks the habit
+  - `&amount=19.42` fills the amount ("$19.42", "19,42" and "1,204.50" all work; junk, 0 and anything over $9,999 are ignored)
+  - `&merchant=…` is shown on the sheet, picks the habit using its statement words, and is saved with the buy
+- **It never saves on its own.** A dark bar on the sheet says "From a quick-log link: [store]. Check it, then tap Save. Nothing is saved until you do." If the store doesn't match a habit, it says to pick one.
+- **The link is cleared after opening,** so a reload won't open the sheet again.
+- **Saved buys** carry `src: 'quicklog'`, and History shows "⚡ [store]."
+- **Duplicate protection:** statement import still treats these as hand-logged buys, so it won't count them twice.
+- **Habits tab → Auto-log → "Set up auto-log"** opens a guide in the sheet:
+  - 5 steps for an iPhone **Shortcuts → Automation → Wallet** automation (iOS 17+): Run Immediately → URL Encode (Merchant) → Open URLs `…/app/?log&amount=AMOUNT&merchant=MERCHANT`
+  - a Copy button for that link
+  - per-habit **one-tap links** (`?log=Pizza`) for Back Tap or NFC stickers, which cover cash and card swipes
+  - **This is unverified on a real iPhone.** The Shortcuts steps are written from Apple's documented Wallet automation.
+
+**Goal jar.**
+- **Setup:** on the Habits tab, under "Your why & goal jar," add an optional goal amount (for example, $400).
+- **The jar only counts money the user says they moved.** The app can't see a bank, so it never guesses or auto-counts.
+- **Home:** one slim bar, "🎯 Spring break fund · $36 of $400," that turns red at 100%. Tapping it opens the goal sheet:
+  - add a move ("I moved it")
+  - the last 5 moves, each with ✕ to remove it
+  - Change goal
+- **The Monday prompt is part of the single "New week" banner (Monday and Tuesday):** "You kept $46 last week. Move it to your [why]?"
+  - The suggestion is last finished week's money kept, never negative, and only for weeks that had limits.
+  - **💰 Move $46** asks for confirmation ("Open your bank app and move it, then tap I moved it").
+  - **📲 Send** sends the report card.
+  - **✕** dismisses both for that week.
+  - The move offer shows at most once per week.
+- **Elsewhere:**
+  - the log sheet shows "· 5% of your [why]"
+  - the share text includes the goal line
+  - reaching the target shows a "Goal hit." screen
+
+**Report card link.**
+- **📲 Send** (History, and the Monday banner) shares a link to `web/card.html#…`.
+- **The week's summary is packed after "#",** so it's never sent to a server. It contains:
+  - each habit: emoji, name, spent, limit, %
+  - streak, money kept, resists
+  - why and goal
+  - **no purchase list and no buy timestamps**
+- **The card page** shows: Week of / Plan week, a bar plus ✅/❌ for each habit, streak / kept / resisted, the goal bar, "Keep them honest," and links to the landing page and demo. Demo data is badged.
+- **Safety:** every field from the link is validated and clamped, and shown as plain text only. A broken or tampered link shows "This link is incomplete."
+- **Fallback:** if the phone can't share, it copies the text plus the link.
+
 ### Installing and offline use
 - **Add to Home Screen** gives a real app icon (a red "NE." square) and opens full screen, with no browser bars.
 - **Works offline after the first visit.** A service worker keeps a copy of the app. It always tries the network first, so updates show up when you're online, and falls back to the saved copy when there's no signal.
@@ -151,6 +196,8 @@
 - **No auto-categorizing beyond statement words.** No AI guessing. A line matches a habit only if it contains one of that habit's words.
 - **No push notifications, reminders or alarms.** The resist countdown only shows inside the app.
 - **No "danger time" or time-of-day patterns.** People often log a buy after the fact, so the logged time isn't reliable enough to find patterns in.
+- **No silent auto-logging.** Quick-log and Apple Pay links only pre-fill. Nothing is saved without a tap.
+- **No savings tracking it can't prove.** The goal jar counts only money the user marks as moved.
 - **No auto-sending.** The accountability text only goes out when you tap Send and pick the person yourself.
 - **No charts or graphs** beyond the progress rings on Home and the progress bars in History. No line charts, no trend graphs.
 - **No editing a purchase.** Delete it and log it again.

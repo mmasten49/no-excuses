@@ -588,6 +588,95 @@
     return before - state.purchases.length;
   }
 
+  // ---------- Money kept for one week (used by the goal jar) ----------
+  // For a finished week: how far under your old pace (starting number ÷ 4) you spent, across habits that had a limit.
+  function weekKept(state, k, now) {
+    var cur = weekIndex(state.startTs, now);
+    if (k < 0 || k > cur) return 0;
+    var map = weekMap(state, Math.max(cur, k)), starts = habitStarts(state, map), w = weekSummary(state, k, now), kept = 0;
+    if (w.skipped) return 0;
+    cats(state).forEach(function (c) { var x = w.cats[c]; if (x.limit !== null && x.limit !== undefined) kept += starts[c].amount / 4 - x.spent; });
+    return round2(kept);
+  }
+
+  // ---------- Goal jar ----------
+  // Only money the user says they actually moved counts. The app can't see a bank, so it never pretends.
+  function goalSaved(state) {
+    return round2(((state.goal && state.goal.moves) || []).reduce(function (a, m) { return a + (m.amount > 0 ? m.amount : 0); }, 0));
+  }
+  // Monday suggestion: last finished week's money kept (never negative). 0 = nothing to suggest.
+  function suggestMove(state, now) {
+    var cur = weekIndex(state.startTs, now);
+    if (cur < 1) return { amount: 0, k: -1 };
+    var k = cur - 1;
+    return { amount: Math.max(0, weekKept(state, k, now)), k: k, weekStart: weekStart(state.startTs, k) };
+  }
+
+  // ---------- Quick-log links (Apple Pay automation, Back Tap, NFC) ----------
+  // ?log            → open the log sheet (habit picked from the merchant, or the first habit)
+  // ?log=Pizza      → open it for that habit (name or id)
+  // &amount=19.42   → prefill the amount ("$19.42" and "19,42" also work)
+  // &merchant=...   → shown on the sheet, used to pick the habit, saved with the buy
+  // Never saves anything by itself: the user always confirms.
+  function parseQuickLog(search, state) {
+    var p;
+    try { p = new URLSearchParams(String(search || '').replace(/^\?/, '')); } catch (e) { return null; }
+    if (!p.has('log')) return null;
+    var want = (p.get('log') || '').trim().toLowerCase(), order = cats(state), cat = null;
+    if (want) order.forEach(function (c) { if (!cat && (c === want || state.habits[c].name.toLowerCase() === want)) cat = c; });
+    var merchant = (p.get('merchant') || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    var auto = false;
+    if (!cat && merchant) { cat = matchHabit(state, merchant); auto = !!cat; }
+    var raw = (p.get('amount') || '').replace(/[^\d.,\-]/g, '');
+    if (/^\d+,\d{2}$/.test(raw)) raw = raw.replace(',', '.');       // "19,42"
+    raw = raw.replace(/,/g, '');
+    var amt = raw ? Math.abs(parseFloat(raw)) : NaN;
+    return { cat: cat || order[0], matched: !!cat, autoMatched: auto, amount: amt > 0 && amt < 10000 ? round2(amt) : null, merchant: merchant };
+  }
+
+  // ---------- Report card link ----------
+  // A week's summary packed into the link after "#" (never sent to any server). Numbers only, no purchase list.
+  function cardData(state, k, now) {
+    var w = weekSummary(state, k, now), st = stats(state, now), res = resistStats(state, w.start, w.end), h = [];
+    cats(state).forEach(function (c) {
+      var x = w.cats[c]; if (x.notYet) return;
+      h.push([state.habits[c].emoji, state.habits[c].name, x.spent, x.limit, x.pct === undefined ? null : x.pct]);
+    });
+    var g = state.goal && state.goal.target > 0 ? [state.goal.target, goalSaved(state)] : null;
+    return { v: 1, d: state.demo ? 1 : 0, ws: w.start, pw: k + 1, c: w.isCurrent ? 1 : 0, sk: w.skipped ? 1 : 0, h: h,
+      st: [st.streak, st.best, st.kept, st.weeksJudged], r: [res.count, res.value], why: state.why || '', g: g };
+  }
+  function b64urlEncode(str) {
+    var bytes = new TextEncoder().encode(str), bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function b64urlDecode(s) {
+    s = String(s).replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    var bin = atob(s), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function encodeCard(data) { return b64urlEncode(JSON.stringify(data)); }
+  // Anything in a link can be forged or broken, so every field is checked and clamped. Bad input → null.
+  function decodeCard(s) {
+    var o;
+    try { o = JSON.parse(b64urlDecode(s)); } catch (e) { return null; }
+    if (!o || o.v !== 1 || !Array.isArray(o.h)) return null;
+    var num = function (x, lo, hi) { x = Number(x); return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : 0; };
+    var str = function (x, n) { return typeof x === 'string' ? x.slice(0, n) : ''; };
+    var h = o.h.slice(0, MAX_HABITS).filter(Array.isArray).map(function (r) {
+      return { emoji: str(r[0], 8), name: str(r[1], 16), spent: num(r[2], 0, 1e5),
+        limit: r[3] === null || r[3] === undefined ? null : num(r[3], 0, 1e5), pct: r[4] === null || r[4] === undefined ? null : num(r[4], 0, 100) };
+    });
+    var st = Array.isArray(o.st) ? o.st : [], rr = Array.isArray(o.r) ? o.r : [];
+    return { demo: !!o.d, weekStart: num(o.ws, 0, 9e15), planWeek: num(o.pw, 1, 9999), current: !!o.c, skipped: !!o.sk, habits: h,
+      streak: num(st[0], 0, 9999), best: num(st[1], 0, 9999), kept: num(st[2], -1e6, 1e6), judged: num(st[3], 0, 9999),
+      resisted: num(rr[0], 0, 9999), resistedValue: num(rr[1], 0, 1e6), why: str(o.why, 40),
+      goal: Array.isArray(o.g) ? { target: num(o.g[0], 0, 1e6), saved: num(o.g[1], 0, 1e6) } : null };
+  }
+
   // ---------- Demo mode ----------
   // Sample data for testers: week 7 of the plan (block 2, week 3). Block 1 had pizza $60/wk and cash $40/wk,
   // so the limits are $54 and $36. Two finished block-2 weeks under the limit = a 2-week streak.
@@ -615,7 +704,8 @@
                 b: { name: 'Cash', emoji: '💵', startK: 0, keywords: suggestKeywords('Cash') } },
       order: ['a', 'b'],
       resists: [{ id: 'demo-r1', cat: 'a', ts: t, until: t + RESIST_MS, amount: 20, status: 'won' }],
-      sharedWeeks: []
+      sharedWeeks: [],
+      goal: { target: 400, moves: [{ id: 'demo-m1', amount: 21, ts: weekStart(start, 5) + DAY }, { id: 'demo-m2', amount: 15, ts: weekStart(start, 6) + 2 * 3600e3 }], asked: [weekStart(start, 4), weekStart(start, 5)] }
     };
   }
 
@@ -657,6 +747,7 @@
     workTime: workTime, yearlyPace: yearlyPace, makeDemo: makeDemo,
     suggestKeywords: suggestKeywords, addHabit: addHabit, deleteHabit: deleteHabit,
     parseCSV: parseCSV, parseDate: parseDate, parseMoney: parseMoney, statementFromCSV: statementFromCSV, statementFromText: statementFromText,
-    merchantName: merchantName, looksLogged: looksLogged, matchHabit: matchHabit, analyzeStatement: analyzeStatement, applyImport: applyImport, undoImport: undoImport
+    merchantName: merchantName, looksLogged: looksLogged, weekKept: weekKept, goalSaved: goalSaved, suggestMove: suggestMove,
+    parseQuickLog: parseQuickLog, cardData: cardData, encodeCard: encodeCard, decodeCard: decodeCard, matchHabit: matchHabit, analyzeStatement: analyzeStatement, applyImport: applyImport, undoImport: undoImport
   };
 })(typeof window !== 'undefined' ? window : globalThis);

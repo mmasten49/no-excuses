@@ -57,3 +57,15 @@ Open the app, name your two habits and pick a Monday. The classmate test task is
   - "Does it connect to my bank?" now covers statement import.
   - Added "Can I track more than two habits?"
 - **Wage matches the ad:** $20/hour, so $19 = 57 min. The calculator defaults to $20 (3 buys × $20 × 52 = $3,120 = 156 hours).
+
+## Update (Nov 17, later)
+**No new tiles.** Three existing tiles were rewritten so the page doesn't grow:
+- "Accountability, one tap" → **"A report card, one tap"** (a link to a clean report card, no app or account needed, numbers inside the link)
+- "Your why, front and center" → **"Your why, with a goal jar"** (the Monday "Move it?" prompt, only money actually moved counts)
+- "Works with no signal" → **"Tap to pay, it logs itself"** (an iPhone Shortcut pre-fills Apple Pay buys, plus offline and Undo)
+
+**The sample message** under the report card tile now shows the link-style message.
+
+**New FAQ:** "Can it log my buys automatically?"
+
+**New page `web/card.html`:** the report card a partner opens from the link.
